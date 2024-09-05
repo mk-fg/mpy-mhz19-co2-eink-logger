@@ -1,0 +1,66 @@
+# wireviz -fp rp2040-wiring.yaml && feh rp2040-wiring.png
+# https://github.com/wireviz/WireViz/blob/master/docs/syntax.md
+
+###
+connectors:
+
+  MCU:
+    type: rpi-pico
+    pins: [40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21]
+    pinlabels: [
+      VBUS, VSYS, GND_1, 3V3 En, 3V3 Out,
+      ADC Vref, GP28 / A2, ADC Gnd, GP27 / A1, GP26 / A0,
+      RUN, GP22, GND_2,
+      GP21-UART1-RX, GP20-UART1-TX,
+      GP19, GP18, GND_3,
+      GP17-I2C0-SCL, GP16-I2C0-SDA ]
+    notes: |-
+      Front side (with usb/chips), right pin header
+      Screen hat is plugged on the rear side
+
+  RTC:
+    type: DS3231
+    pinlabels: [5V, GND, I2C-SDA, I2C-SCL]
+
+  CO2-Sensor:
+    type: MH-Z19
+    pinlabels: [5V, GND, UART-TX, UART-RX, HD]
+
+###
+cables:
+
+  sensor wires:
+    color_code: DIN
+    wirecount: 4
+    colors: [RD, OG, BK, BN]
+
+  sensor calibration switch:
+    color_code: DIN
+    wirecount: 1
+    colors: [GY]
+    notes: Used to calibrate 400ppm level, see datasheet
+
+  rtc wires:
+    color_code: DIN
+    wirecount: 4
+    colors: [RD, BK, BU, GN]
+
+###
+connections:
+
+  -
+    - MCU: [VBUS, GND_1, GP21-UART1-RX, GP20-UART1-TX]
+    - sensor wires: [1-4]
+    - CO2-Sensor: [5V, GND, UART-TX, UART-RX]
+
+  -
+    - MCU: [GND_2]
+    - sensor calibration switch: [1]
+    - CO2-Sensor: [HD]
+
+  -
+    - MCU: [VSYS, GND_3, GP16-I2C0-SDA, GP17-I2C0-SCL]
+    - rtc wires: [1, 2, 4, 3]
+    - RTC: [5V, GND, I2C-SCL, I2C-SDA]
+
+###

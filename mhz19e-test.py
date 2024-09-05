@@ -2,6 +2,7 @@ import machine, time, struct
 
 
 def response_bytes(cmd, bs):
+	if not bs: return
 	if csum := sum(bs[1:-1]) % 0x100: csum = 0xff - csum + 1
 	if ( bs and len(bs) == 9 and bs[0] == 0xff
 			and bs[1] == cmd and csum == bs[-1] ):
@@ -30,7 +31,7 @@ def check_abc(sensor):
 
 
 sensor = machine.UART(
-	0, tx=machine.Pin(16), rx=machine.Pin(17),
+	1, tx=machine.Pin(20), rx=machine.Pin(21),
 	baudrate=9600, bits=8, stop=1, parity=None )
 print('CO2:', read_co2(sensor))
 # print('ABC:', check_abc(sensor))

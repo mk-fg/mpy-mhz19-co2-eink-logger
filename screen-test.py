@@ -184,7 +184,7 @@ def log_gen():
 	import random
 	log = ['#:24-09-05 CO2ppm']
 	ts, ts_fmt = 12 * 60, lambda ts: f'{ts//60:02d}:{ts%60:02d}'
-	ts += random.randint(0, 12*60)
+	ts += random.randint(0, 12 * 60)
 	co2, co2_smooth = random.randint(400, 2800), False
 	def co2_fmt():
 		nonlocal co2

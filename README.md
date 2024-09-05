@@ -26,6 +26,9 @@ but only persistent on the screen until its reset or next use.
 Currently just a bunch of scripts for testing various hw components:
 
 ```
+### Wiring diagram
+wireviz -fp rp2040-wiring.yaml && feh rp2040-wiring.png
+
 ### MH-Z19 CO2 sensor
 mpremote a1 run mhz19e-test.py
 
@@ -37,10 +40,10 @@ tt=`python -c 'import time; print((time.localtime()[:-1]))'` && \
   mpremote a1 run /tmp/rtc-test.py
 
 ### WS 2.13B4 ePaper screen
-mpremote a1 run paper-test.py
+mpremote a1 run screen-test.py
 # To generate image and see it on-screen (in "feh" viewer)
-mpremote a1 run paper-test.py | tee test.b64
-./paper-image-conv.py <test.b64 >test.png && feh --zoom 400 test.png
+mpremote a1 run screen-test.py | tee test.b64
+./screen-test-png.py <test.b64 >test.png && feh --zoom 400 test.png
 ```
 
 Repository URLs:
