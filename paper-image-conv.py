@@ -22,8 +22,8 @@ def main(args=None):
 		PNG file to produce by combining exported black/red input buffers.
 		"-" can be used to output data to stdout instead, which is the default.'''))
 	parser.add_argument('--invert', action='store_true', help=dd('''
-		Do not assume that bitmaps are inverted, which is the default.
-		Not sure why micropython framebuf bitmaps seem to be like that.'''))
+		Do not assume that bitmaps are inverted,
+			which is the default, as bitmaps sent to ePaper screen are inverted.'''))
 	opts = parser.parse_args(sys.argv[1:] if args is None else args)
 
 	@cl.contextmanager
@@ -55,8 +55,8 @@ def main(args=None):
 				f'Bitmap dimensions mismatch [{k}]: sz={sz:,d} wh={buff_wh} actual={(w,h)}' )
 			buff_wh = w, h
 
-	(w, h), invert = buff_wh, not opts.invert
-	colors = dict(black=(0,0,0,0xff), red=(0xff,0,0,0xff))
+	(w, h), C, invert = buff_wh, 0xff, not opts.invert
+	colors = dict(black=(0,0,0,C), red=(C,0,0,C))
 	with (
 			PIL.Image.new('RGBA', buff_wh) as img,
 			out_func_bin(opts.out_png_file) as out ):

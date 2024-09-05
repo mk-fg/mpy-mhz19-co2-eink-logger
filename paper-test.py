@@ -11,7 +11,7 @@ class EPD_2in13_B_V4_Portrait:
 
 	class EPDInterface: # to hide all implementation internals
 		def __init__(self, epd):
-			for k in 'black red display clear sleep'.split():
+			for k in 'black red display clear sleep w h'.split():
 				setattr(self, k, getattr(epd, k))
 
 	def __init__(self, spi_id=None, w=122, h=250, verbose=False, **pins):
@@ -110,7 +110,7 @@ class EPD_2in13_B_V4_Portrait:
 
 	def display(self, fill=None, op='Display'):
 		self.log and self.log(op)
-		if fill: fill = bytes([fill]) * math.ceil(self.h * self.w / 8)
+		if fill: fill = bytes([0xff]) * math.ceil(self.h * self.w / 8)
 		self.cmd(0x24)
 		self.data(fill or self.black_buff)
 		self.cmd(0x26)
@@ -136,43 +136,93 @@ class EPD_2in13_B_V4_Portrait:
 				sys.stdout.buffer.write(binascii.b2a_base64(buff[n:n+line_len]))
 
 
-def draw(epd):
+def draw_test(epd):
 	# base fill
 	epd.black.fill(0xff)
 	epd.red.fill(0xff)
 
 	# text
-	epd.black.text('Waveshare', 0, 10, 0x00)
-	epd.red.text('ePaper-2.13B', 0, 25, 0x00)
-	epd.black.text('RPi Pico', 0, 40, 0x00)
-	epd.red.text('Hello World', 0, 55, 0x00)
+	epd.black.text('Waveshare', 0, 10, 0)
+	epd.red.text('ePaper-2.13B', 0, 25, 0)
+	epd.black.text('RPi Pico', 0, 40, 0)
+	epd.red.text('Hello World', 0, 55, 0)
 
 	# lines
-	epd.red.vline(10, 90, 40, 0x00)
-	epd.red.vline(90, 90, 40, 0x00)
-	epd.black.hline(10, 90, 80, 0x00)
-	epd.black.hline(10, 130, 80, 0x00)
-	epd.red.line(10, 90, 90, 130, 0x00)
-	epd.black.line(90, 90, 10, 130, 0x00)
+	epd.red.vline(10, 90, 40, 0)
+	epd.red.vline(90, 90, 40, 0)
+	epd.black.hline(10, 90, 80, 0)
+	epd.black.hline(10, 130, 80, 0)
+	epd.red.line(10, 90, 90, 130, 0)
+	epd.black.line(90, 90, 10, 130, 0)
 
 	# rectangles
-	epd.black.rect(10, 150, 40, 40, 0x00)
-	epd.red.fill_rect(60, 150, 40, 40, 0x00)
+	epd.black.rect(10, 150, 40, 40, 0)
+	epd.red.fill_rect(60, 150, 40, 40, 0)
 
 
-epd = EPD_2in13_B_V4_Portrait()
-draw(epd)
-epd.export_image_buffers()
+def draw_log(epd, log):
+	import re
+	y, red, buff = 3, False, (epd.black, epd.red)
+	x_line, x_text, y_line = 0, 3, 10
+	epd.black.fill(1)
+	epd.red.fill(1)
+	for line in log:
+		if m := re.match(r'[-=#]+:', line):
+			pre, line = m.group(0)[:-1], line[m.end():]
+			for c in pre:
+				if c == '=': red = False
+				elif c == '#': red = True
+				elif c == '-':
+					buff[red].hline(x_line, y, epd.w - x_line*2, 0)
+					y += 3
+		if y + 8 > epd.h: break
+		buff[red].text(line, x_text, y, 0)
+		y += y_line
 
 
-# with EPD_2in13_B_V4_Portrait(1, dc=8, cs=9, reset=12, busy=13, verbose=True) as epd:
-# 	draw(epd)
+def log_gen():
+	import random
+	log = ['#:24-09-05 CO2ppm']
+	ts, ts_fmt = 12 * 60, lambda ts: f'{ts//60:02d}:{ts%60:02d}'
+	ts += random.randint(0, 12*60)
+	co2, co2_smooth = random.randint(400, 2800), False
+	def co2_fmt():
+		nonlocal co2
+		if co2_smooth:
+			while True:
+				co2 += random.randint(-60, +200)
+				if co2 > 400: break
+			if co2 > 8_000: co2 = random.randint(500, 3500)
+		else:
+			if random.random() > 0.6: co2 = random.randint(400, 900)
+			elif random.random() > 0.4: co2 = random.randint(500, 3000)
+			else: co2 = random.randint(500, 8000)
+		if co2 < 800: warn = ''
+		elif co2 < 1500: warn = ' hi'
+		elif co2 < 2500: warn = ' BAD'
+		elif co2 < 5000: warn = ' WARN'
+		else: warn = ' !!!!'
+		return f'{co2: >04d}{warn}'
+	log.append(f'=-:{ts_fmt(ts)} {co2_fmt()}')
+	for n in range(50):
+		c, ts = '#='[n%2], (ts + 17) % (24*60)
+		log.append(f'{c}:{ts_fmt(ts)} {co2_fmt()}')
+	return log
 
-# 	epd.scr.display()
-# 	print('display delay')
-# 	time.sleep(60)
 
-# 	epd.scr.clear()
-# 	time.sleep(2)
+# epd = EPD_2in13_B_V4_Portrait()
+# draw_log(epd, log_gen())
+# epd.export_image_buffers()
 
-# 	epd.scr.sleep()
+
+with EPD_2in13_B_V4_Portrait(1, dc=8, cs=9, reset=12, busy=13, verbose=True) as epd:
+	draw_log(epd, log_gen())
+
+	epd.display()
+	print('-- Display delay [s]:', delay := 60)
+	time.sleep(delay)
+
+	epd.clear()
+	time.sleep(2)
+
+	epd.sleep()

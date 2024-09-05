@@ -1,8 +1,8 @@
-Micropython MH-Z19x CO2 eInk Logger
+Micropython MH-Z19x CO2 EInk Logger
 ===================================
 
 Work-in-progress project to put together a CO2 sensor device with timestamped
-log of its measurements on a persistent eInk screen (or ePaper one actually).
+log of its measurements on a persistent EInk screen (or ePaper one actually).
 
 Components involved:
 
