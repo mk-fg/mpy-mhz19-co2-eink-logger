@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import pathlib as pl, contextlib as cl, itertools as it
+import pathlib as pl, contextlib as cl, collections as cs, itertools as it
 import os, sys, io, base64
 
 import PIL.Image # pillow module
@@ -14,13 +14,20 @@ def main(args=None):
 		formatter_class=argparse.RawTextHelpFormatter, description=dd('''
 			Merge b64-exported black/red image buffers to a png file.'''))
 	parser.add_argument('-i', '--in-b64-file', metavar='file', help=dd('''
-		File exported by epd.export_image_buffers() func in micropython script.
-		Format is empty-line-separated base64 lines with "<w> <h> <len>" prefix.
+		Output with epd.export_image_buffers() data from running micropython script.
+		Every line relevant to this script should start with -p/--prefix (e.g. "-epd-:").
+		Data format is "<BK/RD> <w> <h> <len-B>" first line, then base64 bitmap lines.
 		File should have exactly two MONO_HLSB bitmap buffers, black then red.
 		"-" can be used to read data from stdin instead, which is the default.'''))
 	parser.add_argument('-o', '--out-png-file', metavar='file', help=dd('''
 		PNG file to produce by combining exported black/red input buffers.
 		"-" can be used to output data to stdout instead, which is the default.'''))
+	parser.add_argument('-p', '--prefix', metavar='prefix', default='-epd-:',
+		help='Line-prefix used for exported bitmaps -i/--in-b64-file. Default: %(default)s')
+	parser.add_argument('-n', '--in-img-num', metavar='n', type=int, default=-1, help=dd('''
+		Offset/index of image from the -i/--in-b64-file data to convert,
+			using python list-index notation (0 - first, -1 - last, etc).
+		Input can contain multiple images, and by default last one is used.'''))
 	parser.add_argument('--invert', action='store_true', help=dd('''
 		Do not assume that bitmaps are inverted,
 			which is the default, as bitmaps sent to ePaper screen are inverted.'''))
@@ -37,31 +44,43 @@ def main(args=None):
 		p = pl.Path(f'{path}.new')
 		try:
 			with open(p, 'wb') as tmp: yield tmp.write
+			p.rename(path)
 		finally: p.unlink(missing_ok=True)
 
-	buff_wh, buffs = None, dict(black=None, red=None)
-	with in_file(opts.in_b64_file) as src:
-		for k in buffs:
-			w = h = sz = None; b64 = list()
-			while line := src.readline():
-				if not (line := line.strip()) and b64: break
-				elif not line: continue
-				if not sz: w, h, sz = map(int, line.split()); continue
-				b64.append(line)
-			buff = buffs[k] = base64.b64decode(''.join(b64))
-			if (n := len(buff)) != sz: raise ValueError(
-				f'Buffer size mismatch [{k}]: expected={sz or 0:,d} actual={len(buff):,d}' )
-			if w*h//8 != sz or (buff_wh and buff_wh != (w, h)): raise ValueError(
-				f'Bitmap dimensions mismatch [{k}]: sz={sz:,d} wh={buff_wh} actual={(w,h)}' )
-			buff_wh = w, h
+	def iter_bitmaps(src):
+		buff, pre_n = list(), len(pre := opts.prefix)
+		while line := src.readline():
+			if not (line := line.strip()):
+				if buff: yield buff
+				buff.clear(); continue
+			if line.startswith(pre): buff.append(line[pre_n:])
+		if buff: yield buff
 
-	(w, h), C, invert = buff_wh, 0xff, not opts.invert
-	colors = dict(black=(0,0,0,C), red=(C,0,0,C))
+	bitmap_t = cs.namedtuple('Bitmap', 'bt w h buff')
+	def parse_bitmap(lines):
+		bt, (w, h, sz) = (line := lines[0].split())[0], map(int, line[1:])
+		buff = base64.b64decode(''.join(lines[1:]))
+		if (n := len(buff)) != sz: raise ValueError(
+			f'Buffer size mismatch [{bt}]: expected={sz or 0:,d} actual={len(buff):,d}' )
+		if w*h//8 != sz: raise ValueError(
+			f'Buffer dimensions mismatch [{bt}]: sz={sz:,d} actual={(w,h)}' )
+		return bitmap_t(bt, w, h, buff)
+
+	bitmaps = list()
+	with in_file(opts.in_b64_file) as src:
+		for bk, rd in it.batched(map(parse_bitmap, iter_bitmaps(src)), 2):
+			if (bk.bt, rd.bt) != ('BK', 'RD') or (bk.w, bk.h) != (rd.w, rd.h):
+				raise ValueError( 'Black/red bitmap type/dimensions'
+					' mismatch: black{(bk.bt, bk.w, bk.h)} != red{(rd.bt, rd.w, rd.h)}' )
+			bitmaps.append((bk, rd))
+	bk, rd = bitmaps[opts.in_img_num]
+
+	C, invert, (w, h) = 0xff, not opts.invert, (buff_wh := (bk.w, bk.h))
 	with (
 			PIL.Image.new('RGBA', buff_wh) as img,
 			out_func_bin(opts.out_png_file) as out ):
-		for c, buff in buffs.items():
-			c, sz, wb = colors[c], len(buff), w//8
+		for c, bm in [(0,0,0,C), bk], [(C,0,0,C), rd]:
+			sz, wb = len(buff := bm.buff), w//8
 			for y, x in it.product(range(0, sz, wb), range(wb)):
 				bits = buff[y+x]
 				for n in range(8):
