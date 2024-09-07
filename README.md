@@ -32,7 +32,7 @@ temporarily, to pick it up and check how CO2 levels vary there over time later.
 Table of Contents for this README:
 
 - [How to use](#hdr-how_to_use)
-- [Helper scripts](#hdr-helper_scripts)
+- [Helper scripts](#hdr-helper_scripts_and_debugging)
 - [Links](#hdr-links)
 - [TODO](#hdr-todo)
 
@@ -49,7 +49,7 @@ Repository URLs:
 It's just one self-contained [main.py] micropython script, using an
 [ini configuration file] with a list of pins and tunable parameters.
 
-One possible wiring diagram for e.g. RPi Pico (rp2040) board,
+One possible wiring diagram for e.g. [RPi Pico (rp2040) board],
 and pins/interfaces from [config.example.ini] file:
 
 ![WireViz rp2040 wiring diagram][]
@@ -62,6 +62,7 @@ realistically it'll probably only work as-is with pico and compatible knock-offs
 
 [main.py]: main.py
 [ini configuration file]: config.example.ini
+[RPi Pico (rp2040) board]: https://pico.pinout.xyz/
 [config.example.ini]: config.example.ini
 [rp2040-wiring.yaml]: rp2040-wiring.yaml
 [WireViz rp2040 wiring diagram]:
@@ -98,28 +99,34 @@ See [Bible of MH-Z19x CO2 sensors] for a lot more details on all this.
 [Bible of MH-Z19x CO2 sensors]: https://emariete.com/en/sensor-co2-mh-z19b/
 
 
-<a name=hdr-helper_scripts></a>
-## Helper scripts
+<a name=hdr-helper_scripts_and_debugging></a>
+## Helper scripts and debugging
 
-These are for testing and configuring individual components.
+Every component can have `verbose = yes` option in the config file to enable
+verbose logging to USB/UART console - wherever micropython dumps output by default.
+[mpremote] or any other serial console tool can be used to see these logs as
+script produces them.
+
+Repository also has couple scripts for testing and configuring individual components.
+
+[mpremote]: https://docs.micropython.org/en/latest/reference/mpremote.html
 
 **[edp-png.py]**
 
-Regular-python script to use with `test-export=yes` screen-config option,
-to convert and see bitmaps output to console instead of display as PNG files.
-
-Related `test-fill=yes` option can be used to also generate fake data to
+Regular-python script to use with `test-export = yes` screen-config option,
+to convert and see bitmaps output to console (instead of display) as PNG files.
+Related `test-fill = yes` option can be used to also generate fake data to
 test various text layout and graphical tweaks.
 
-For example, to run the script, dump images to `test.b64` file,
-then parse it and see a PNG image (using common [feh] image viewer):
+For example, to run the script, dump images to `test.b64` file, then parse it
+and see a last display state as PNG image (using common [feh] image viewer):
 
 ```
 mpremote run main.py | tee test.b64
 ./edp-png.py -i test.b64 -o test.png && feh --zoom 400 test.png
 ```
 
-Script requires common [python "pillow" module] (aka PIL) to make PNG.
+Requires [python "pillow" module] (aka PIL) to make PNG.
 
 [edp-png.py]: edp-png.py
 [feh]: https://wiki.archlinux.org/title/Feh
@@ -141,6 +148,10 @@ These three chained commands get the current localtime tuple for the script, use
 It parses same `config.ini` file for `[rtc]` section i2c/pin info on device, if any.
 Will read and print RTC time back after updating it.
 
+Local time is used for RTC (as opposed to more conventional UTC) to avoid needing
+to configure timezones and their DST quirks, so in timezones with DST, such time
+adjustment has to be run every six months (or TZ offsets handling added to main.py).
+
 [rtc-set.py]: rtc-set.py
 
 
@@ -154,8 +165,18 @@ Will read and print RTC time back after updating it.
   but has a good amount of technical and protocol information and
   documentation on these devices, which datasheets lack.
 
+- [ESPHome] - more comprehensive home automation system, which also supports
+  this family of sensors (among many others) connected to microcontrollers,
+  for a more complex setup to see/control everything in a centralized manner.
+
+- [rp2040-sen5x-air-quality-webui-monitor] - similar project to monitor
+  particulate matter (PM) air pollution via autonomous device.
+
 [The Bible of MH-Z19x CO2 sensors]: https://emariete.com/en/sensor-co2-mh-z19b/
 [WifWaf/MH-Z19 driver for MH-Z19x CO2 sensors]: https://github.com/WifWaf/MH-Z19
+[ESPHome]: https://esphome.io/components/sensor/mhz19.html
+[rp2040-sen5x-air-quality-webui-monitor]:
+  https://github.com/mk-fg/rp2040-sen5x-air-quality-webui-monitor
 
 
 <a name=hdr-todo></a>
@@ -165,9 +186,4 @@ Will read and print RTC time back after updating it.
 
 - Add on-screen error output, if there are any.
 
-- Add simple WebUI for W models, and for debugging as well.
-
-- Copy useful doc parts from [rp2040-sen5x-air-quality-webui-monitor project].
-
-[rp2040-sen5x-air-quality-webui-monitor project]:
-  https://github.com/mk-fg/rp2040-sen5x-air-quality-webui-monitor
+- Add data WebUI for W models, can be useful for errors as well.
