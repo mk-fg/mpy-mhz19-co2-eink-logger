@@ -25,10 +25,8 @@ class CO2LogConf:
 	sensor_detection_range = 2_000
 	sensor_self_calibration = False
 	sensor_ppm_offset = 0
-	sensor_read_delay = 0.1
-	sensor_read_retry_n = 5
-	sensor_read_retry_delay = 0.1
-	sensor_error_rate_limit = '8 / 3m'
+	sensor_read_delays = '0.1 0.1 0.1 0.2 0.3 0.5 1.0'
+	sensor_read_retry_delays = '0.1 1 5 10 20 40 80 120 180'
 
 	rtc_i2c = 0
 	rtc_pin_sda = 16
@@ -48,15 +46,6 @@ class CO2LogConf:
 
 p_err = lambda *a: print('ERROR:', *a)
 err_fmt = lambda err: f'[{err.__class__.__name__}] {err}'
-
-def token_bucket_iter(spec): # spec = N / M[smhd], e.g. 10 / 15m
-	burst, span = map(str.strip, spec.split('/', 1))
-	span = float(span[:-1]) * {'s': 1, 'm': 60, 'h': 3600, 'd': 24*3600}[span[-1]]
-	rate = 1 / (1000 * span / (burst := int(burst))) # token / ms
-	tokens, ts = max(0, burst - 1), time.ticks_ms()
-	while (yield tokens >= 0) or (ts_sync := ts):
-		tokens = min( burst, tokens +
-			time.ticks_diff(ts := time.ticks_ms(), ts_sync) * rate ) - 1
 
 
 def conf_parse(conf_file):
@@ -235,29 +224,31 @@ class RTC_DS3231:
 			raise ValueError(f'Failed to encode time-tuple:\n    {p(tt)}\n to {p(tt_enc)}')
 		self.i2c.writeto_mem(0x68, 0x00, bs)
 
-	def read(self):
-		bs = self.i2c.readfrom_mem(0x68, 0x00, 7)
-		return time.mktime(self._decode(bs))
+	async def read(self): # uses hardcoded read-retry attempts
+		for td in 0.05, 0.1, 0.1, 0.2, 0.3, None:
+			try: bs = self.i2c.readfrom_mem(0x68, 0x00, 7)
+			except:
+				if td: await asyncio.sleep(td)
+				else: raise
+			else: return time.mktime(self._decode(bs))
 
-
-class MHZ19Error(Exception): pass
 
 class MHZ19:
 
 	def __init__(self, uart): self.uart = uart
 
-	def response_bytes(self, cmd, bs):
+	def _res_bytes(self, cmd, bs):
 		if not bs: return
 		if csum := sum(bs[1:-1]) % 0x100: csum = 0xff - csum + 1
 		if ( bs and len(bs) == 9 and bs[0] == 0xff
 				and bs[1] == cmd and csum == bs[-1] ):
 			return bs[2:-1] # 6B of actual payload
 
-	async def read_ppm(self, read_delay=0.1):
+	async def read_ppm(self, read_delays=[0.1, 0.1, 0.2, 0.2, 0.5]):
 		bs = self.uart.write(b'\xff\x01\x86\x00\x00\x00\x00\x00\x79')
-		await asyncio.sleep(read_delay)
-		bs = self.uart.read(bs)
-		if bs := self.response_bytes(0x86, bs): return bs[0]*256 + bs[1]
+		for td in read_delays:
+			await asyncio.sleep(td)
+			if bs := self._res_bytes(0x86, self.uart.read(9)): return bs[0]*256 + bs[1]
 
 	async def set_abc(self, state): # Automatic Baseline Correction
 		if state: self.uart.write(b'\xff\x01\x79\xa0\x00\x00\x00\x00\xe6')
@@ -272,12 +263,13 @@ class MHZ19:
 
 
 async def sensor_poller( conf, mhz19, rtc,
-		readings, abc_repeat=12*3593*1000, verbose=False ):
+		readings, init_delay=0, abc_repeat=12*3593*1000, verbose=False ):
 	p_log = verbose and (lambda *a: print('[sensor]', *a))
+	read_delays = list(map(float, conf.sensor_read_delays.split()))
+	read_retry_delays = list(map(float, conf.sensor_read_retry_delays.split())) + [None]
 
 	p_log and p_log('Init: configuration')
-	read_td = int(conf.sensor_interval * 1000)
-	err_rate_limit = token_bucket_iter(conf.sensor_error_rate_limit)
+	td_cycle = int(conf.sensor_interval * 1000)
 	await asyncio.sleep(0.2)
 	mhz19.set_abc(ts_abc_off := conf.sensor_self_calibration)
 	if not ts_abc_off: ts_abc = time.ticks_ms()
@@ -288,32 +280,26 @@ async def sensor_poller( conf, mhz19, rtc,
 		await asyncio.sleep(delay)
 	else: p_log and p_log('Init: skipping preheat delay due to uptime')
 
-	p_log and p_log(f'Starting poller loop ({read_td/1000:,.1f}s interval)...')
-	err_last = ValueError('Invalid error rate-limiter settings')
-	while next(err_rate_limit):
-		try:
-			while True:
-				ts = time.ticks_ms()
-				if not ts_abc_off and time.ticks_diff(ts, ts_abc) > abc_repeat:
-					# Arduino MH-Z19 code repeats this every 12h to "skip next ABC cycle"
-					# Not sure if it actually needs to be repeated, but why not
-					mhz19.set_abc(ts_abc_off); ts_abc = ts
-				for n in range(conf.sensor_read_retry_n + 1):
-					if ppm := await mhz19.read_ppm(conf.sensor_read_delay):
-						ts_rtc = rtc.read()
-						p_log and p_log(f'datapoint: {ts_rtc} {ppm:,d}')
-						readings.put((ts_rtc, ppm + conf.sensor_ppm_offset))
-						break
-					await asyncio.sleep(conf.sensor_read_retry_delay)
-				else: raise MHZ19Error(f'Read failed after {conf.sensor_read_retry_n} retries')
-				delay = max(0, read_td - time.ticks_diff(time.ticks_ms(), ts))
-				p_log and p_log(f'delay: {delay/1000:,.1f} ms')
-				await asyncio.sleep_ms(delay)
-		except MHZ19Error as err:
-			p_log and p_log(f'MH-Z19 poller failure: {err_fmt(err)}')
-			err_last = err
-			# XXX: there needs to be a delay here, to avoid all-failures in a row
-	p_err(f'Sensor-poll failure rate-limiting: {err_fmt(err_last)}')
+	p_log and p_log(f'Starting poller loop ({td_cycle/1000:,.1f}s interval)...')
+	while True:
+		ts = time.ticks_ms()
+		if not ts_abc_off and time.ticks_diff(ts, ts_abc) > abc_repeat:
+			# Arduino MH-Z19 code repeats this every 12h to "skip next ABC cycle"
+			# Not sure if it actually needs to be repeated, but why not
+			mhz19.set_abc(ts_abc_off); ts_abc = ts
+		p_log and p_log(f'datapoint read')
+		for n, td_retry in enumerate(read_retry_delays):
+			if ppm := await mhz19.read_ppm(read_delays):
+				ts_rtc = await rtc.read()
+				p_log and p_log(f'datapoint [retries={n}]: {ts_rtc} {ppm:,d}')
+				readings.put((ts_rtc, ppm + conf.sensor_ppm_offset))
+				break
+			if td_retry: await asyncio.sleep(td_retry)
+		else: raise RuntimeError(
+			f'CO2 sensor read failed after {len(read_retry_delays)} attempts' )
+		delay = max(0, td_cycle - time.ticks_diff(time.ticks_ms(), ts))
+		p_log and p_log(f'delay: {delay/1000:,.1f} ms')
+		await asyncio.sleep_ms(delay)
 
 
 class EPD_2in13_B_V4_Portrait:
@@ -469,7 +455,7 @@ async def co2_log_scroller(epd, readings, x0=1, y0=3, y_line=10, export=False):
 	# y: 0 <y0> header hline <yh> lines[0] ... <yt> lines[lines_n-1] <epd.h-1>
 	# XXX: maybe put dotted vlines to separate times and warnings
 	buffs = epd.black, epd.red
-	if not export: await epd.clear() # XXX: only clear if pre-heat timer is active
+	if not export: await epd.clear()
 	else:
 		for buff in buffs: buff.fill(1)
 	ys = y_line; yh = y0 + ys + 3
@@ -518,7 +504,8 @@ async def main_co2log(conf, wifi):
 		components.append(sensor_poller(
 			conf, mhz19, rtc, readings, verbose=conf.sensor_verbose ))
 	if conf.screen_test_fill:
-		co2_gen = co2_log_fake_gen(ts_rtc=rtc and rtc.read(), td=conf.sensor_interval)
+		ts_rtc = rtc and await rtc.read()
+		co2_gen = co2_log_fake_gen(ts_rtc=ts_rtc, td=conf.sensor_interval)
 		for ts_rtc, ppm in co2_gen: readings.put((ts_rtc, ppm))
 
 	epd = EPD_2in13_B_V4_Portrait(verbose=conf.screen_verbose)
