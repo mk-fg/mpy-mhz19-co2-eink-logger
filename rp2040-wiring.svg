@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg width="1136pt" height="630pt" viewBox="0 0 1136 629.75" xmlns="http://www.w3.org/2000/svg">
+<g class="graph" transform="scale(1) translate(4 625.75)">
+<polygon points="-4 4 -4 -625.75 1132 -625.75 1132 4" fill="#b5e9ff"/>
+<g class="node">
+<polygon points="312.5 -593 0 -593 0 0 312.5 0" fill="#b5e9ff" stroke="#000"/>
+<polygon points="0 -567.75 0 -593 312.5 -593 312.5 -567.75" fill="none" stroke="#000"/>
+<text x="140.12" y="-575.7" font-family="DejaVu Sans" font-size="14">MCU</text>
+<polygon points="0 -542.5 0 -567.75 160 -567.75 160 -542.5" fill="none" stroke="#000"/>
+<text x="53.75" y="-550.45" font-family="DejaVu Sans" font-size="14">rpi-pico</text>
+<polygon points="160 -542.5 160 -567.75 312.5 -567.75 312.5 -542.5" fill="none" stroke="#000"/>
+<text x="213.75" y="-550.45" font-family="DejaVu Sans" font-size="14">20-pin</text>
+<polygon points="0 -517.5 0 -542.5 203.75 -542.5 203.75 -517.5" fill="none" stroke="#000"/>
+<text x="82.38" y="-525.2" font-family="DejaVu Sans" font-size="14">VBUS</text>
+<polygon points="203.75 -517.5 203.75 -542.5 312.5 -542.5 312.5 -517.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-525.2" font-family="DejaVu Sans" font-size="14">40</text>
+<polygon points="0 -492.5 0 -517.5 203.75 -517.5 203.75 -492.5" fill="none" stroke="#000"/>
+<text x="83.88" y="-500.2" font-family="DejaVu Sans" font-size="14">VSYS</text>
+<polygon points="203.75 -492.5 203.75 -517.5 312.5 -517.5 312.5 -492.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-500.2" font-family="DejaVu Sans" font-size="14">39</text>
+<polygon points="0 -467.5 0 -492.5 203.75 -492.5 203.75 -467.5" fill="none" stroke="#000"/>
+<text x="78.25" y="-475.2" font-family="DejaVu Sans" font-size="14">GND_1</text>
+<polygon points="203.75 -467.5 203.75 -492.5 312.5 -492.5 312.5 -467.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-475.2" font-family="DejaVu Sans" font-size="14">38</text>
+<polygon points="0 -442.5 0 -467.5 203.75 -467.5 203.75 -442.5" fill="none" stroke="#000"/>
+<text x="76.75" y="-450.2" font-family="DejaVu Sans" font-size="14">3V3 En</text>
+<polygon points="203.75 -442.5 203.75 -467.5 312.5 -467.5 312.5 -442.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-450.2" font-family="DejaVu Sans" font-size="14">37</text>
+<polygon points="0 -417.5 0 -442.5 203.75 -442.5 203.75 -417.5" fill="none" stroke="#000"/>
+<text x="73" y="-425.2" font-family="DejaVu Sans" font-size="14">3V3 Out</text>
+<polygon points="203.75 -417.5 203.75 -442.5 312.5 -442.5 312.5 -417.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-425.2" font-family="DejaVu Sans" font-size="14">36</text>
+<polygon points="0 -392.5 0 -417.5 203.75 -417.5 203.75 -392.5" fill="none" stroke="#000"/>
+<text x="70.38" y="-400.2" font-family="DejaVu Sans" font-size="14">ADC Vref</text>
+<polygon points="203.75 -392.5 203.75 -417.5 312.5 -417.5 312.5 -392.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-400.2" font-family="DejaVu Sans" font-size="14">35</text>
+<polygon points="0 -367.5 0 -392.5 203.75 -392.5 203.75 -367.5" fill="none" stroke="#000"/>
+<text x="67.38" y="-375.2" font-family="DejaVu Sans" font-size="14">GP28 / A2</text>
+<polygon points="203.75 -367.5 203.75 -392.5 312.5 -392.5 312.5 -367.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-375.2" font-family="DejaVu Sans" font-size="14">34</text>
+<polygon points="0 -342.5 0 -367.5 203.75 -367.5 203.75 -342.5" fill="none" stroke="#000"/>
+<text x="70.38" y="-350.2" font-family="DejaVu Sans" font-size="14">ADC Gnd</text>
+<polygon points="203.75 -342.5 203.75 -367.5 312.5 -367.5 312.5 -342.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-350.2" font-family="DejaVu Sans" font-size="14">33</text>
+<polygon points="0 -317.5 0 -342.5 203.75 -342.5 203.75 -317.5" fill="none" stroke="#000"/>
+<text x="67.38" y="-325.2" font-family="DejaVu Sans" font-size="14">GP27 / A1</text>
+<polygon points="203.75 -317.5 203.75 -342.5 312.5 -342.5 312.5 -317.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-325.2" font-family="DejaVu Sans" font-size="14">32</text>
+<polygon points="0 -292.5 0 -317.5 203.75 -317.5 203.75 -292.5" fill="none" stroke="#000"/>
+<text x="67.38" y="-300.2" font-family="DejaVu Sans" font-size="14">GP26 / A0</text>
+<polygon points="203.75 -292.5 203.75 -317.5 312.5 -317.5 312.5 -292.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-300.2" font-family="DejaVu Sans" font-size="14">31</text>
+<polygon points="0 -267.5 0 -292.5 203.75 -292.5 203.75 -267.5" fill="none" stroke="#000"/>
+<text x="86.5" y="-275.2" font-family="DejaVu Sans" font-size="14">RUN</text>
+<polygon points="203.75 -267.5 203.75 -292.5 312.5 -292.5 312.5 -267.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-275.2" font-family="DejaVu Sans" font-size="14">30</text>
+<polygon points="0 -242.5 0 -267.5 203.75 -267.5 203.75 -242.5" fill="none" stroke="#000"/>
+<text x="83.5" y="-250.2" font-family="DejaVu Sans" font-size="14">GP22</text>
+<polygon points="203.75 -242.5 203.75 -267.5 312.5 -267.5 312.5 -242.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-250.2" font-family="DejaVu Sans" font-size="14">29</text>
+<polygon points="0 -217.5 0 -242.5 203.75 -242.5 203.75 -217.5" fill="none" stroke="#000"/>
+<text x="78.25" y="-225.2" font-family="DejaVu Sans" font-size="14">GND_2</text>
+<polygon points="203.75 -217.5 203.75 -242.5 312.5 -242.5 312.5 -217.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-225.2" font-family="DejaVu Sans" font-size="14">28</text>
+<polygon points="0 -192.5 0 -217.5 203.75 -217.5 203.75 -192.5" fill="none" stroke="#000"/>
+<text x="45.25" y="-200.2" font-family="DejaVu Sans" font-size="14">GP21-UART1-RX</text>
+<polygon points="203.75 -192.5 203.75 -217.5 312.5 -217.5 312.5 -192.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-200.2" font-family="DejaVu Sans" font-size="14">27</text>
+<polygon points="0 -167.5 0 -192.5 203.75 -192.5 203.75 -167.5" fill="none" stroke="#000"/>
+<text x="46.75" y="-175.2" font-family="DejaVu Sans" font-size="14">GP20-UART1-TX</text>
+<polygon points="203.75 -167.5 203.75 -192.5 312.5 -192.5 312.5 -167.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-175.2" font-family="DejaVu Sans" font-size="14">26</text>
+<polygon points="0 -142.5 0 -167.5 203.75 -167.5 203.75 -142.5" fill="none" stroke="#000"/>
+<text x="83.5" y="-150.2" font-family="DejaVu Sans" font-size="14">GP19</text>
+<polygon points="203.75 -142.5 203.75 -167.5 312.5 -167.5 312.5 -142.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-150.2" font-family="DejaVu Sans" font-size="14">25</text>
+<polygon points="0 -117.5 0 -142.5 203.75 -142.5 203.75 -117.5" fill="none" stroke="#000"/>
+<text x="83.5" y="-125.2" font-family="DejaVu Sans" font-size="14">GP18</text>
+<polygon points="203.75 -117.5 203.75 -142.5 312.5 -142.5 312.5 -117.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-125.2" font-family="DejaVu Sans" font-size="14">24</text>
+<polygon points="0 -92.5 0 -117.5 203.75 -117.5 203.75 -92.5" fill="none" stroke="#000"/>
+<text x="78.25" y="-100.2" font-family="DejaVu Sans" font-size="14">GND_3</text>
+<polygon points="203.75 -92.5 203.75 -117.5 312.5 -117.5 312.5 -92.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-100.2" font-family="DejaVu Sans" font-size="14">23</text>
+<polygon points="0 -67.5 0 -92.5 203.75 -92.5 203.75 -67.5" fill="none" stroke="#000"/>
+<text x="49" y="-75.2" font-family="DejaVu Sans" font-size="14">GP17-I2C0-SCL</text>
+<polygon points="203.75 -67.5 203.75 -92.5 312.5 -92.5 312.5 -67.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-75.2" font-family="DejaVu Sans" font-size="14">22</text>
+<polygon points="0 -42.5 0 -67.5 203.75 -67.5 203.75 -42.5" fill="none" stroke="#000"/>
+<text x="47.5" y="-50.2" font-family="DejaVu Sans" font-size="14">GP16-I2C0-SDA</text>
+<polygon points="203.75 -42.5 203.75 -67.5 312.5 -67.5 312.5 -42.5" fill="none" stroke="#000"/>
+<text x="249.12" y="-50.2" font-family="DejaVu Sans" font-size="14">21</text>
+<polygon points="0 0 0 -42.5 312.5 -42.5 312.5 0" fill="none" stroke="#000"/>
+<text x="4" y="-25.2" font-family="DejaVu Sans" font-size="14">Front side (with usb/chips), right pin header</text>
+<text x="4" y="-7.95" font-family="DejaVu Sans" font-size="14">Screen hat is plugged on the rear side</text>
+<polygon points="876.5 -621.75 456.5 -621.75 456.5 -421.25 876.5 -421.25" fill="#b5e9ff" stroke="#000"/>
+<polygon points="456.5 -596.5 456.5 -621.75 876.5 -621.75 876.5 -596.5" fill="none" stroke="#000"/>
+<text x="623" y="-604.45" font-family="DejaVu Sans" font-size="14">sensor wires</text>
+<polygon points="456.5 -571.25 456.5 -596.5 876.5 -596.5 876.5 -571.25" fill="none" stroke="#000"/>
+<text x="657.88" y="-579.2" font-family="DejaVu Sans" font-size="14">4x</text>
+<text x="542.25" y="-555.95" font-family="DejaVu Sans" font-size="14"></text>
+<text x="495.38" y="-534.95" font-family="DejaVu Sans" font-size="14">MCU:40:VBUS</text>
+<text x="634.38" y="-534.95" font-family="DejaVu Sans" font-size="14">1:RD    </text>
+<text x="733.88" y="-534.95" font-family="DejaVu Sans" font-size="14">CO2-Sensor:1:5V</text>
+<polygon points="456.5 -527.25 456.5 -529.25 876.5 -529.25 876.5 -527.25"/>
+<polygon points="456.5 -525.25 456.5 -527.25 876.5 -527.25 876.5 -525.25" fill="#f00"/>
+<polygon points="456.5 -523.25 456.5 -525.25 876.5 -525.25 876.5 -523.25"/>
+<text x="491.25" y="-507.95" font-family="DejaVu Sans" font-size="14">MCU:38:GND_1</text>
+<text x="635.88" y="-507.95" font-family="DejaVu Sans" font-size="14">2:LB    </text>
+<text x="727.5" y="-507.95" font-family="DejaVu Sans" font-size="14">CO2-Sensor:2:GND</text>
+<polygon points="456.5 -500.25 456.5 -502.25 876.5 -502.25 876.5 -500.25"/>
+<polygon points="456.5 -498.25 456.5 -500.25 876.5 -500.25 876.5 -498.25" fill="#a0dfff"/>
+<polygon points="456.5 -496.25 456.5 -498.25 876.5 -498.25 876.5 -496.25"/>
+<text x="458.25" y="-480.95" font-family="DejaVu Sans" font-size="14">MCU:27:GP21-UART1-RX</text>
+<text x="635.88" y="-480.95" font-family="DejaVu Sans" font-size="14">3:PK    </text>
+<text x="714" y="-480.95" font-family="DejaVu Sans" font-size="14">CO2-Sensor:3:UART-TX</text>
+<polygon points="456.5 -473.25 456.5 -475.25 876.5 -475.25 876.5 -473.25"/>
+<polygon points="456.5 -471.25 456.5 -473.25 876.5 -473.25 876.5 -471.25" fill="#f6c"/>
+<polygon points="456.5 -469.25 456.5 -471.25 876.5 -471.25 876.5 -469.25"/>
+<text x="459.75" y="-453.95" font-family="DejaVu Sans" font-size="14">MCU:26:GP20-UART1-TX</text>
+<text x="635.88" y="-453.95" font-family="DejaVu Sans" font-size="14">4:YE    </text>
+<text x="712.5" y="-453.95" font-family="DejaVu Sans" font-size="14">CO2-Sensor:4:UART-RX</text>
+<polygon points="456.5 -446.25 456.5 -448.25 876.5 -448.25 876.5 -446.25"/>
+<polygon points="456.5 -444.25 456.5 -446.25 876.5 -446.25 876.5 -444.25" fill="#ff0"/>
+<polygon points="456.5 -442.25 456.5 -444.25 876.5 -444.25 876.5 -442.25"/>
+<text x="542.25" y="-426.95" font-family="DejaVu Sans" font-size="14"></text>
+</g>
+<g class="edge" fill="none" stroke-width="2">
+<path d="m312.5-528c63.56-0.05 79.52 3.7 144 3.75" stroke="#000"/>
+<path d="m312.5-530c64.02 0 79.98 3.75 144 3.75" stroke="#f00"/>
+<path d="m312.5-532c64.48 0.05 80.44 3.8 144 3.75" stroke="#000"/>
+<path d="m312.5-478c66.15-0.78 81.01-20.03 144-19.25" stroke="#000"/>
+<path d="m312.5-480c64.57 0 79.43-19.25 144-19.25" stroke="#a0dfff"/>
+<path d="m312.5-482c62.99 0.78 77.85-18.47 144-19.25" stroke="#000"/>
+<path d="m312.5-203c136.73-2.85 10.89-270.1 144-267.25" stroke="#000"/>
+<path d="m312.5-205c134.92 0 9.08-267.25 144-267.25" stroke="#f6c"/>
+<path d="m312.5-207c133.11 2.85 7.27-264.4 144-267.25" stroke="#000"/>
+<path d="m312.5-178c135.95-2.85 11.67-268.1 144-265.25" stroke="#000"/>
+<path d="m312.5-180c134.14 0 9.86-265.25 144-265.25" stroke="#ff0"/>
+<path d="m312.5-182c132.33 2.85 8.05-262.4 144-265.25" stroke="#000"/>
+</g>
+<g class="node">
+<polygon points="832.5 -396.88 500.5 -396.88 500.5 -252.12 832.5 -252.12" fill="#b5e9ff" stroke="#000"/>
+<polygon points="500.5 -371.62 500.5 -396.88 832.5 -396.88 832.5 -371.62" fill="none" stroke="#000"/>
+<text x="580.25" y="-379.57" font-family="DejaVu Sans" font-size="14">sensor calibration switch</text>
+<polygon points="500.5 -346.38 500.5 -371.62 832.5 -371.62 832.5 -346.38" fill="none" stroke="#000"/>
+<text x="657.88" y="-354.32" font-family="DejaVu Sans" font-size="14">1x</text>
+<text x="556.75" y="-331.07" font-family="DejaVu Sans" font-size="14"></text>
+<text x="505.75" y="-310.07" font-family="DejaVu Sans" font-size="14">MCU:28:GND_2</text>
+<text x="622.62" y="-310.07" font-family="DejaVu Sans" font-size="14">1:GY    </text>
+<text x="705.75" y="-310.07" font-family="DejaVu Sans" font-size="14">CO2-Sensor:5:HD</text>
+<polygon points="500.5 -302.38 500.5 -304.38 832.5 -304.38 832.5 -302.38"/>
+<polygon points="500.5 -300.38 500.5 -302.38 832.5 -302.38 832.5 -300.38" fill="#999"/>
+<polygon points="500.5 -298.38 500.5 -300.38 832.5 -300.38 832.5 -298.38"/>
+<text x="556.75" y="-283.07" font-family="DejaVu Sans" font-size="14"></text>
+<polygon points="500.5 -252.12 500.5 -277.38 832.5 -277.38 832.5 -252.12" fill="none" stroke="#000"/>
+<text x="504.5" y="-260.07" font-family="DejaVu Sans" font-size="14">Used to calibrate 400ppm level, see datasheet</text>
+</g>
+<g class="edge" fill="none" stroke-width="2">
+<path d="m312.5-228c90.94-1.75 100.02-73.12 187-71.38" stroke="#000"/>
+<path d="m312.5-230c88.96 0 98.04-71.38 187-71.38" stroke="#999"/>
+<path d="m312.5-232c86.98 1.75 96.06-69.63 187-71.37" stroke="#000"/>
+</g>
+<g class="node">
+<polygon points="845 -227.75 488 -227.75 488 -27.25 845 -27.25" fill="#b5e9ff" stroke="#000"/>
+<polygon points="488 -202.5 488 -227.75 845 -227.75 845 -202.5" fill="none" stroke="#000"/>
+<text x="636.88" y="-210.45" font-family="DejaVu Sans" font-size="14">rtc wires</text>
+<polygon points="488 -177.25 488 -202.5 845 -202.5 845 -177.25" fill="none" stroke="#000"/>
+<text x="657.88" y="-185.2" font-family="DejaVu Sans" font-size="14">4x</text>
+<text x="571.75" y="-161.95" font-family="DejaVu Sans" font-size="14"></text>
+<text x="526.38" y="-140.95" font-family="DejaVu Sans" font-size="14">MCU:39:VSYS</text>
+<text x="662.38" y="-140.95" font-family="DejaVu Sans" font-size="14">1:RD    </text>
+<text x="760.5" y="-140.95" font-family="DejaVu Sans" font-size="14">RTC:1:5V</text>
+<polygon points="488 -133.25 488 -135.25 845 -135.25 845 -133.25"/>
+<polygon points="488 -131.25 488 -133.25 845 -133.25 845 -131.25" fill="#f00"/>
+<polygon points="488 -129.25 488 -131.25 845 -131.25 845 -129.25"/>
+<text x="520.75" y="-113.95" font-family="DejaVu Sans" font-size="14">MCU:23:GND_3</text>
+<text x="663.12" y="-113.95" font-family="DejaVu Sans" font-size="14">2:BK    </text>
+<text x="754.12" y="-113.95" font-family="DejaVu Sans" font-size="14">RTC:2:GND</text>
+<polygon points="488 -106.25 488 -108.25 845 -108.25 845 -106.25"/>
+<polygon points="488 -104.25 488 -106.25 845 -106.25 845 -104.25"/>
+<polygon points="488 -102.25 488 -104.25 845 -104.25 845 -102.25"/>
+<text x="491.5" y="-86.95" font-family="DejaVu Sans" font-size="14">MCU:22:GP17-I2C0-SCL</text>
+<text x="662.38" y="-86.95" font-family="DejaVu Sans" font-size="14">3:BU    </text>
+<text x="741" y="-86.95" font-family="DejaVu Sans" font-size="14">RTC:3:I2C-SDA</text>
+<polygon points="488 -79.25 488 -81.25 845 -81.25 845 -79.25"/>
+<polygon points="488 -77.25 488 -79.25 845 -79.25 845 -77.25" fill="#06f"/>
+<polygon points="488 -75.25 488 -77.25 845 -77.25 845 -75.25"/>
+<text x="490" y="-59.95" font-family="DejaVu Sans" font-size="14">MCU:21:GP16-I2C0-SDA</text>
+<text x="662" y="-59.95" font-family="DejaVu Sans" font-size="14">4:GN    </text>
+<text x="742.5" y="-59.95" font-family="DejaVu Sans" font-size="14">RTC:4:I2C-SCL</text>
+<polygon points="488 -52.25 488 -54.25 845 -54.25 845 -52.25"/>
+<polygon points="488 -50.25 488 -52.25 845 -52.25 845 -50.25" fill="#0f0"/>
+<polygon points="488 -48.25 488 -50.25 845 -50.25 845 -48.25"/>
+<text x="571.75" y="-32.95" font-family="DejaVu Sans" font-size="14"></text>
+</g>
+<g class="edge" fill="none" stroke-width="2">
+<path d="m312.5-503c181.14-2.91-10.2 369.84 174.5 372.75" stroke="#000"/>
+<path d="m312.5-505c182.92 0-8.42 372.75 174.5 372.75" stroke="#f00"/>
+<path d="m312.5-507c184.7 2.91-6.64 375.66 174.5 372.75" stroke="#000"/>
+<path d="m312.5-103c77.58 0 96.97-0.25 174.5-0.25" stroke="#000"/>
+<path d="m312.5-105c77.56 0 96.94-0.25 174.5-0.25" stroke="#000"/>
+<path d="m312.5-107c77.53 0 96.92-0.25 174.5-0.25" stroke="#000"/>
+<path d="m312.5-53c77.19-0.04 96.55 3.71 174.5 3.75" stroke="#000"/>
+<path d="m312.5-55c77.57 0 96.93 3.75 174.5 3.75" stroke="#0f0"/>
+<path d="m312.5-57c77.95 0.04 97.31 3.79 174.5 3.75" stroke="#000"/>
+<path d="m312.5-78c77.38-0.01 96.76 1.74 174.5 1.75" stroke="#000"/>
+<path d="m312.5-80c77.56 0 96.94 1.75 174.5 1.75" stroke="#06f"/>
+<path d="m312.5-82c77.74 0.01 97.12 1.76 174.5 1.75" stroke="#000"/>
+</g>
+<g class="node">
+<polygon points="1128 -585.25 1020.5 -585.25 1020.5 -409.75 1128 -409.75" fill="#b5e9ff" stroke="#000"/>
+<polygon points="1020.5 -560 1020.5 -585.25 1128 -585.25 1128 -560" fill="none" stroke="#000"/>
+<text x="1032.62" y="-567.95" font-family="DejaVu Sans" font-size="14">CO2-Sensor</text>
+<polygon points="1020.5 -534.75 1020.5 -560 1084 -560 1084 -534.75" fill="none" stroke="#000"/>
+<text x="1024.5" y="-542.7" font-family="DejaVu Sans" font-size="14">MH-Z19</text>
+<polygon points="1084 -534.75 1084 -560 1128 -560 1128 -534.75" fill="none" stroke="#000"/>
+<text x="1088" y="-542.7" font-family="DejaVu Sans" font-size="14">5-pin</text>
+<polygon points="1020.5 -509.75 1020.5 -534.75 1048.2 -534.75 1048.2 -509.75" fill="none" stroke="#000"/>
+<text x="1029.88" y="-517.45" font-family="DejaVu Sans" font-size="14">1</text>
+<polygon points="1048.2 -509.75 1048.2 -534.75 1128 -534.75 1128 -509.75" fill="none" stroke="#000"/>
+<text x="1078.75" y="-517.45" font-family="DejaVu Sans" font-size="14">5V</text>
+<polygon points="1020.5 -484.75 1020.5 -509.75 1048.2 -509.75 1048.2 -484.75" fill="none" stroke="#000"/>
+<text x="1029.88" y="-492.45" font-family="DejaVu Sans" font-size="14">2</text>
+<polygon points="1048.2 -484.75 1048.2 -509.75 1128 -509.75 1128 -484.75" fill="none" stroke="#000"/>
+<text x="1072.38" y="-492.45" font-family="DejaVu Sans" font-size="14">GND</text>
+<polygon points="1020.5 -459.75 1020.5 -484.75 1048.2 -484.75 1048.2 -459.75" fill="none" stroke="#000"/>
+<text x="1029.88" y="-467.45" font-family="DejaVu Sans" font-size="14">3</text>
+<polygon points="1048.2 -459.75 1048.2 -484.75 1128 -484.75 1128 -459.75" fill="none" stroke="#000"/>
+<text x="1058.88" y="-467.45" font-family="DejaVu Sans" font-size="14">UART-TX</text>
+<polygon points="1020.5 -434.75 1020.5 -459.75 1048.2 -459.75 1048.2 -434.75" fill="none" stroke="#000"/>
+<text x="1029.88" y="-442.45" font-family="DejaVu Sans" font-size="14">4</text>
+<polygon points="1048.2 -434.75 1048.2 -459.75 1128 -459.75 1128 -434.75" fill="none" stroke="#000"/>
+<text x="1057.38" y="-442.45" font-family="DejaVu Sans" font-size="14">UART-RX</text>
+<polygon points="1020.5 -409.75 1020.5 -434.75 1048.2 -434.75 1048.2 -409.75" fill="none" stroke="#000"/>
+<text x="1029.88" y="-417.45" font-family="DejaVu Sans" font-size="14">5</text>
+<polygon points="1048.2 -409.75 1048.2 -434.75 1128 -434.75 1128 -409.75" fill="none" stroke="#000"/>
+<text x="1077.62" y="-417.45" font-family="DejaVu Sans" font-size="14">HD</text>
+<polygon points="1128 -192.75 1020.5 -192.75 1020.5 -42.25 1128 -42.25" fill="#b5e9ff" stroke="#000"/>
+<polygon points="1020.5 -167.5 1020.5 -192.75 1128 -192.75 1128 -167.5" fill="none" stroke="#000"/>
+<text x="1061.12" y="-175.45" font-family="DejaVu Sans" font-size="14">RTC</text>
+<polygon points="1020.5 -142.25 1020.5 -167.5 1084 -167.5 1084 -142.25" fill="none" stroke="#000"/>
+<text x="1024.5" y="-150.2" font-family="DejaVu Sans" font-size="14">DS3231</text>
+<polygon points="1084 -142.25 1084 -167.5 1128 -167.5 1128 -142.25" fill="none" stroke="#000"/>
+<text x="1088" y="-150.2" font-family="DejaVu Sans" font-size="14">4-pin</text>
+<polygon points="1020.5 -117.25 1020.5 -142.25 1050.2 -142.25 1050.2 -117.25" fill="none" stroke="#000"/>
+<text x="1030.88" y="-124.95" font-family="DejaVu Sans" font-size="14">1</text>
+<polygon points="1050.2 -117.25 1050.2 -142.25 1128 -142.25 1128 -117.25" fill="none" stroke="#000"/>
+<text x="1079.75" y="-124.95" font-family="DejaVu Sans" font-size="14">5V</text>
+<polygon points="1020.5 -92.25 1020.5 -117.25 1050.2 -117.25 1050.2 -92.25" fill="none" stroke="#000"/>
+<text x="1030.88" y="-99.95" font-family="DejaVu Sans" font-size="14">2</text>
+<polygon points="1050.2 -92.25 1050.2 -117.25 1128 -117.25 1128 -92.25" fill="none" stroke="#000"/>
+<text x="1073.38" y="-99.95" font-family="DejaVu Sans" font-size="14">GND</text>
+<polygon points="1020.5 -67.25 1020.5 -92.25 1050.2 -92.25 1050.2 -67.25" fill="none" stroke="#000"/>
+<text x="1030.88" y="-74.95" font-family="DejaVu Sans" font-size="14">3</text>
+<polygon points="1050.2 -67.25 1050.2 -92.25 1128 -92.25 1128 -67.25" fill="none" stroke="#000"/>
+<text x="1060.25" y="-74.95" font-family="DejaVu Sans" font-size="14">I2C-SDA</text>
+<polygon points="1020.5 -42.25 1020.5 -67.25 1050.2 -67.25 1050.2 -42.25" fill="none" stroke="#000"/>
+<text x="1030.88" y="-49.95" font-family="DejaVu Sans" font-size="14">4</text>
+<polygon points="1050.2 -42.25 1050.2 -67.25 1128 -67.25 1128 -42.25" fill="none" stroke="#000"/>
+<text x="1061.75" y="-49.95" font-family="DejaVu Sans" font-size="14">I2C-SCL</text>
+</g>
+<g class="edge" fill="none" stroke-width="2">
+<path d="m876.5-524.25c63.54-0.06 79.49 3.94 144 4" stroke="#000"/>
+<path d="m876.5-526.25c64.02 0 79.98 4 144 4" stroke="#f00"/>
+<path d="m876.5-528.25c64.51 0.06 80.46 4.06 144 4" stroke="#000"/>
+<path d="m876.5-497.25c63.76-0.02 79.75 1.98 144 2" stroke="#000"/>
+<path d="m876.5-499.25c64.01 0 79.99 2 144 2" stroke="#a0dfff"/>
+<path d="m876.5-501.25c64.25 0.02 80.24 2.02 144 2" stroke="#000"/>
+<path d="m876.5-470.25h144" stroke="#000"/>
+<path d="m876.5-472.25h144" stroke="#f6c"/>
+<path d="m876.5-474.25h144" stroke="#000"/>
+<path d="m876.5-443.25c64.25-0.02 80.24-2.02 144-2" stroke="#000"/>
+<path d="m876.5-445.25c64.01 0 79.99-2 144-2" stroke="#ff0"/>
+<path d="m876.5-447.25c63.76 0.02 79.75-1.98 144-2" stroke="#000"/>
+<path d="m833.5-299.38c100.95-2.18 90.03-123.05 187-120.87" stroke="#000"/>
+<path d="m833.5-301.37c98.96-0.01 88.04-120.88 187-120.88" stroke="#999"/>
+<path d="m833.5-303.37c96.97 2.18 86.05-118.7 187-120.88" stroke="#000"/>
+<path d="m846-130.25c77.31-0.02 96.68 2.48 174.5 2.5" stroke="#000"/>
+<path d="m846-132.25c77.56 0 96.94 2.5 174.5 2.5" stroke="#f00"/>
+<path d="m846-134.25c77.82 0.02 97.19 2.52 174.5 2.5" stroke="#000"/>
+<path d="m846-103.25c77.5 0 96.89 0.5 174.5 0.5" stroke="#000"/>
+<path d="m846-105.25c77.56 0 96.94 0.5 174.5 0.5" stroke="#000"/>
+<path d="m846-107.25c77.61 0 97 0.5 174.5 0.5" stroke="#000"/>
+<path d="m846-49.25c77.93-0.03 97.28-3.53 174.5-3.5" stroke="#000"/>
+<path d="m846-51.25c77.57 0 96.93-3.5 174.5-3.5" stroke="#0f0"/>
+<path d="m846-53.25c77.22 0.03 96.57-3.47 174.5-3.5" stroke="#000"/>
+<path d="m846-76.25c77.71-0.01 97.1-1.51 174.5-1.5" stroke="#000"/>
+<path d="m846-78.25c77.56 0 96.94-1.5 174.5-1.5" stroke="#06f"/>
+<path d="m846-80.25c77.4 0.01 96.79-1.49 174.5-1.5" stroke="#000"/>
+</g>
+</g>
+</svg>

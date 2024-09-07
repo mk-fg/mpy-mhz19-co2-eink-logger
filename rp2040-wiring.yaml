@@ -1,5 +1,13 @@
-# wireviz -fp rp2040-wiring.yaml && feh rp2040-wiring.png
+# wireviz -fs rp2040-wiring.yaml && feh rp2040-wiring.svg
+# scour --remove-descriptive-elements --enable-viewboxing --enable-id-stripping  --shorten-ids
+#   --enable-comment-stripping --indent=none rp2040-wiring.svg{,.new} && mv rp2040-wiring.svg{.new,}
 # https://github.com/wireviz/WireViz/blob/master/docs/syntax.md
+
+options:
+  bgcolor: '#b5e9ff'
+  bgcolor_connector: '#b5e9ff'
+  bgcolor_cable: '#b5e9ff'
+  fontname: DejaVu Sans
 
 ###
 connectors:
@@ -32,7 +40,7 @@ cables:
   sensor wires:
     color_code: DIN
     wirecount: 4
-    colors: [RD, OG, BK, BN]
+    colors: [RD, LB, PK, YE]
 
   sensor calibration switch:
     color_code: DIN

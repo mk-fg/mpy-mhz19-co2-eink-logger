@@ -21,7 +21,7 @@ class CO2LogConf:
 	sensor_pin_tx = 20
 	sensor_pin_rx = 21
 	sensor_init_delay = 210.0
-	sensor_interval = 673.0
+	sensor_interval = 1021.0
 	sensor_detection_range = 2_000
 	sensor_self_calibration = False
 	sensor_ppm_offset = 0
@@ -222,12 +222,11 @@ class RTC_DS3231:
 		# (v - 6 * (v>>4)) == (10 * (v>>4) + (v & 0xf)), same for reverse op
 		ss, mm, hh, wd, dd, mo, yy = bytes( (v - 6 * (v>>4))
 			for v in (b & m for m, b in zip(b'\x7f\x7f\x3f\x07\x3f\x1f\xff', bs)) )
-		if bs[2] & 40: hh += 12 * bool(bs[2] & 20)
+		if bs[2] & 0x40: hh += 12 * bool(bs[2] & 0x20)
 		yd = int((275 * mo) / 9.0) - (1 + (yy % 4)) * int((mo + 9) / 12.0) + dd - 30
 		return yy+2000, mo, dd, hh, mm, ss, wd, yd
 
 	def set(self, tt): # set RTC from localtime timetuple
-		# XXX: config options for setting RTC
 		yy, mo, dd, hh, mm, ss, wd, yd = tt
 		bs = bytearray([ss, mm, hh, wd, dd, mo, yy - 2000])
 		for n, v in enumerate(bs): bs[n] = v + 6 * (v//10)
@@ -313,6 +312,7 @@ async def sensor_poller( conf, mhz19, rtc,
 		except MHZ19Error as err:
 			p_log and p_log(f'MH-Z19 poller failure: {err_fmt(err)}')
 			err_last = err
+			# XXX: there needs to be a delay here, to avoid all-failures in a row
 	p_err(f'Sensor-poll failure rate-limiting: {err_fmt(err_last)}')
 
 
@@ -416,6 +416,7 @@ class EPD_2in13_B_V4_Portrait:
 		self.cmd(0x26)
 		self.data(self.red_buff)
 		self.cmd(0x20) # activate display update sequence
+		# XXX: add time limit for this operation, re-init display if it times-out
 		await self.wait_ready()
 
 	async def clear(self, color=1):
@@ -468,7 +469,7 @@ async def co2_log_scroller(epd, readings, x0=1, y0=3, y_line=10, export=False):
 	# y: 0 <y0> header hline <yh> lines[0] ... <yt> lines[lines_n-1] <epd.h-1>
 	# XXX: maybe put dotted vlines to separate times and warnings
 	buffs = epd.black, epd.red
-	if not export: await epd.clear()
+	if not export: await epd.clear() # XXX: only clear if pre-heat timer is active
 	else:
 		for buff in buffs: buff.fill(1)
 	ys = y_line; yh = y0 + ys + 3
