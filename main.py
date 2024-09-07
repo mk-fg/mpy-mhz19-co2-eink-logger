@@ -227,6 +227,7 @@ class RTC_DS3231:
 		return yy+2000, mo, dd, hh, mm, ss, wd, yd
 
 	def set(self, tt): # set RTC from localtime timetuple
+		# XXX: config options for setting RTC
 		yy, mo, dd, hh, mm, ss, wd, yd = tt
 		bs = bytearray([ss, mm, hh, wd, dd, mo, yy - 2000])
 		for n, v in enumerate(bs): bs[n] = v + 6 * (v//10)

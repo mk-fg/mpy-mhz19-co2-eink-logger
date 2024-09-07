@@ -12,9 +12,13 @@ def main(args=None):
 		textwrap.dedent(text).strip('\n') + '\n' ).replace('\t', '  ')
 	parser = argparse.ArgumentParser(
 		formatter_class=argparse.RawTextHelpFormatter, description=dd('''
-			Merge b64-exported black/red image buffers to a png file.'''))
+			Merge b64-exported black/red screen bitmaps from script log to a PNG file.
+			Intended to be used with [screen] test-export = yes option,
+				something like this: mpremote run main.py | tee test.log
+			Where "test.log" will then have exported screen dumps for this script, which can
+				convert e.g. last of these to PNG like this: %(prog)s -i test.b64 -o test.png'''))
 	parser.add_argument('-i', '--in-b64-file', metavar='file', help=dd('''
-		Output with epd.export_image_buffers() data from running micropython script.
+		Output with epd.export_image_buffers() data from main.py micropython script.
 		Every line relevant to this script should start with -p/--prefix (e.g. "-epd-:").
 		Data format is "<BK/RD> <w> <h> <len-B>" first line, then base64 bitmap lines.
 		File should have exactly two MONO_HLSB bitmap buffers, black then red.
@@ -87,7 +91,6 @@ def main(args=None):
 					if ((bits >> (7 - n)) & 1) ^ invert: img.putpixel((x*8 + n, y//wb), c)
 		img.save(buff := io.BytesIO(), format='png', optimize=True)
 		out(buff.getvalue())
-
 
 if __name__ == '__main__':
 	try: sys.exit(main())
