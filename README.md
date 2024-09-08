@@ -165,6 +165,9 @@ adjustment has to be run every six months (or TZ offsets handling added to main.
   but has a good amount of technical and protocol information and
   documentation on these devices, which datasheets lack.
 
+- [Waveshare ePaper Display "Precautions" section] - for recommendations on
+  minimum refresh interval, how long-term storage, etc - to avoid damaging it.
+
 - [ESPHome] - more comprehensive home automation system, which also supports
   this family of sensors (among many others) connected to microcontrollers,
   for a more complex setup to see/control everything in a centralized manner.
@@ -174,6 +177,8 @@ adjustment has to be run every six months (or TZ offsets handling added to main.
 
 [The Bible of MH-Z19x CO2 sensors]: https://emariete.com/en/sensor-co2-mh-z19b/
 [WifWaf/MH-Z19 driver for MH-Z19x CO2 sensors]: https://github.com/WifWaf/MH-Z19
+[Waveshare ePaper Display "Precautions" section]:
+  https://www.waveshare.com/wiki/2.13inch_e-Paper_HAT_(B)_Manual#Precautions
 [ESPHome]: https://esphome.io/components/sensor/mhz19.html
 [rp2040-sen5x-air-quality-webui-monitor]:
   https://github.com/mk-fg/rp2040-sen5x-air-quality-webui-monitor

@@ -45,6 +45,7 @@ class CO2LogConf:
 	screen_y_line = 10
 	screen_test_fill = False
 	screen_test_export = False
+	screen_timeout = 80.0
 
 p_err = lambda *a: print('ERROR:', *a)
 err_fmt = lambda err: f'[{err.__class__.__name__}] {err}'
@@ -203,7 +204,7 @@ class ReadingsQueue:
 			if not self.data: self.ev.clear()
 			else: self.ev.set() # for ThreadSafeFlag
 			return value
-	def empty(self): return not self.data
+	def is_empty(self): return not self.data
 
 
 class RTC_DS3231:
@@ -271,7 +272,6 @@ async def sensor_read(rtc, mhz19, read_delays, retry_delays, ewma_a, ewma_tds):
 		for n, td_retry in enumerate(retry_delays):
 			if ppm := await mhz19.read_ppm(read_delays):
 				ewma = ppm if ewma is None else (ppm * ewma_a + (1-ewma_a)*ewma)
-				print('--- read', n, ppm)
 				retries += n; break
 			if td_retry: await asyncio.sleep(td_retry)
 		else: raise RuntimeError(
@@ -312,7 +312,7 @@ async def sensor_poller( conf, mhz19, rtc,
 			mhz19.set_abc(ts_abc_off); ts_abc = ts
 		p_log and p_log(f'datapoint read [{ewma_info}]')
 		n, ts_rtc, ppm = await mhz19_read()
-		p_log and p_log(f'datapoint [retries={n}]: {ts_rtc} {ppm:,d}')
+		p_log and p_log(f'datapoint [retries={n}]: ts={ts_rtc} ppm={ppm:,d}')
 		readings.put((ts_rtc, ppm + conf.sensor_ppm_offset))
 		delay = max(0, td_cycle - ewma_td_ms - time.ticks_diff(time.ticks_ms(), ts))
 		p_log and p_log(f'delay: {delay/1000:,.1f} ms')
@@ -327,39 +327,46 @@ class EPD_2in13_B_V4_Portrait:
 				raise ValueError(f'Pin specs mismatch: {" ".join(err)}')
 			for k, v in pins.items(): setattr(self, k, v)
 
-	class EPDInterface: # to hide all implementation internals
+	class EPDInterface: # hides all implementation internals
 		def __init__(self, epd):
-			for k in 'black red display clear sleep_mode w h'.split():
+			for k in 'black red display clear w h'.split():
 				setattr(self, k, getattr(epd, k))
 
-	def __init__(self, spi=None, w=122, h=250, verbose=False, **pins):
-		self.p, self.p_log = pins, verbose and (lambda *a: print('[epd]', *a))
-		self.spi, self.h, self.w = spi, h, math.ceil(w/8)*8
+	def __init__(self, w=122, h=250, timeout=120, verbose=False):
+		self.p_log = verbose and (lambda *a: print('[epd]', *a))
+		self.h, self.w, self.active, self.timeout = h, math.ceil(w/8)*8, None, timeout
 		for c in 'black', 'red':
 			setattr(self, f'{c}_buff', buff := bytearray(math.ceil(self.w * self.h / 8)))
 			setattr(self, c, framebuf.FrameBuffer(buff, self.w, self.h, framebuf.MONO_HLSB))
 
-	async def init(self, spi=None, **pins):
-		p_log, Pin = self.p_log, machine.Pin
-		p_log and p_log('Init: spi/pins')
-		pins = self.p = self.Pins(pins or self.p)
-		for k in 'reset', 'cs', 'dc':
-			setattr(pins, k, Pin(getattr(pins, k), Pin.OUT))
-		pins.busy = Pin(pins.busy, Pin.IN, Pin.PULL_UP)
-		if spi is not None: self.spi = spi
-		self.spi.init(baudrate=4000_000)
+	async def hw_init(self, spi=None, **pins):
+		if spi and pins: # first init
+			p_log, Pin = self.p_log, machine.Pin
+			p_log and p_log('Init: spi/pins')
+			pins = self.p = self.Pins(pins)
+			for k in 'reset', 'cs', 'dc':
+				setattr(pins, k, Pin(getattr(pins, k), Pin.OUT))
+			pins.busy = Pin(pins.busy, Pin.IN, Pin.PULL_UP)
+			self.spi = spi
+			spi.init(baudrate=4000_000)
+			if time.ticks_ms() < 20: await asyncio.sleep_ms(20)
+			epd_iface = self.EPDInterface(self)
+		else:
+			spi, pins = self.spi, self.p
+			p_log = epd_iface = None
+		if self.active: return # no need for init
 
 		async def wait_ready(_p_busy=pins.busy):
 			while _p_busy.value(): await asyncio.sleep_ms(10)
 			await asyncio.sleep_ms(20)
-		def cmd(b, _p_dc=pins.dc, _p_cs=pins.cs):
+		def cmd(b, _p_dc=pins.dc, _p_cs=pins.cs, _spi=spi):
 			_p_dc.value(0); _p_cs.value(0)
-			self.spi.write(bytes([b])); _p_cs.value(1)
-		def data(bs, _p_dc=pins.dc, _p_cs=pins.cs):
+			_spi.write(bytes([b])); _p_cs.value(1)
+		def data(bs, _p_dc=pins.dc, _p_cs=pins.cs, _spi=spi):
 			if isinstance(bs, int): bs = bytes([bs])
 			elif isinstance(bs, list): bs = bytes(b&0xff for b in bs)
 			_p_dc.value(1); _p_cs.value(0)
-			self.spi.write(bs); _p_cs.value(1)
+			_spi.write(bs); _p_cs.value(1)
 		self.wait_ready, self.cmd, self.data = wait_ready, cmd, data
 
 		p_log and p_log('Init: reset')
@@ -392,33 +399,40 @@ class EPD_2in13_B_V4_Portrait:
 		await wait_ready()
 
 		p_log and p_log('Init: finished')
-		return self.EPDInterface(self)
+		self.active = True
+		return epd_iface
 
 	def close(self):
-		self.spi = self.p = self.cmd = self.data = None
+		self.cmd = self.data = self.wait_ready = self.active = None
 		self.p_log and self.p_log('Closed')
 
-	async def display(self, op='Display'):
+	async def display(self, op='Display', final=False):
 		self.p_log and self.p_log(op)
+		await self.hw_init()
 		self.cmd(0x24)
 		self.data(self.black_buff)
 		self.cmd(0x26)
 		self.data(self.red_buff)
 		self.cmd(0x20) # activate display update sequence
-		# XXX: add time limit for this operation, re-init display if it times-out
-		await self.wait_ready()
-
-	async def clear(self, color=1):
-		self.black.fill(color)
-		self.red.fill(color)
-		await self.display('Clear')
+		try: await asyncio.wait_for(self.wait_ready(), self.timeout)
+		except asyncio.TimeoutError:
+			if final: raise
+			self.close() # force reset
+			await self.display(op=f'{op} [retry]', final=True)
+		await self.sleep_mode()
 
 	async def sleep_mode(self):
 		self.p_log and self.p_log('Sleep mode')
 		self.cmd(0x10)
 		self.data(0x01)
-		await asyncio.sleep(2)
+		await asyncio.sleep(2) # not sure why, was in example code
 		self.p.reset.value(0)
+		self.active = False
+
+	async def clear(self, color=1):
+		self.black.fill(color)
+		self.red.fill(color)
+		await self.display('Clear')
 
 	def export_image_buffers(self, line_bytes=90):
 		import sys, binascii
@@ -485,7 +499,7 @@ async def co2_log_scroller(epd, readings, x0=1, y0=3, y_line=10, export=False):
 		buffs[line.red].text(line.text, x0, yh + ys * (len(lines) - 1), 0)
 		# Display/dump buffers
 		if not export:
-			if readings.empty(): await epd.display() # batch updates otherwise
+			if readings.is_empty(): await epd.display() # batch updates otherwise
 		else: epd.export_image_buffers()
 
 
@@ -511,9 +525,10 @@ async def main_co2log(conf, wifi):
 		co2_gen = co2_log_fake_gen(ts_rtc=ts_rtc, td=conf.sensor_interval)
 		for ts_rtc, ppm in co2_gen: readings.put((ts_rtc, ppm))
 
-	epd = EPD_2in13_B_V4_Portrait(verbose=conf.screen_verbose)
+	epd = EPD_2in13_B_V4_Portrait(
+		timeout=conf.screen_timeout, verbose=conf.screen_verbose )
 	if not (epd_export := conf.screen_test_export):
-		epd = await epd.init( machine.SPI(conf.screen_spi),
+		epd = await epd.hw_init( machine.SPI(conf.screen_spi),
 			**conf_vals(conf, 'screen_pin', 'dc cs reset busy') )
 	components.append(co2_log_scroller( epd, readings,
 		export=epd_export, **conf_vals(conf, 'screen', 'x0 y0 y_line') ))
