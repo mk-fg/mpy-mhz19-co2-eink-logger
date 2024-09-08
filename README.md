@@ -190,5 +190,3 @@ adjustment has to be run every six months (or TZ offsets handling added to main.
 - Finish leftover XXX not-implemented things in the code.
 
 - Add on-screen error output, if there are any.
-
-- Add data WebUI for W models, can be useful for errors as well.
