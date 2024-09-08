@@ -25,6 +25,8 @@ class CO2LogConf:
 	sensor_detection_range = 2_000
 	sensor_self_calibration = False
 	sensor_ppm_offset = 0
+	sensor_ewma_alpha = 0.4
+	sensor_ewma_read_delays = ''
 	sensor_read_delays = '0.1 0.1 0.1 0.2 0.3 0.5 1.0'
 	sensor_read_retry_delays = '0.1 1 5 10 20 40 80 120 180'
 
@@ -262,11 +264,32 @@ class MHZ19:
 		self.uart.write(bs)
 
 
+async def sensor_read(rtc, mhz19, read_delays, retry_delays, ewma_a, ewma_tds):
+	ewma, retries = None, 0
+	for td in ewma_tds:
+		if td: await asyncio.sleep(td)
+		for n, td_retry in enumerate(retry_delays):
+			if ppm := await mhz19.read_ppm(read_delays):
+				ewma = ppm if ewma is None else (ppm * ewma_a + (1-ewma_a)*ewma)
+				print('--- read', n, ppm)
+				retries += n; break
+			if td_retry: await asyncio.sleep(td_retry)
+		else: raise RuntimeError(
+			f'CO2 sensor read failed after {len(retry_delays)} attempt(s)' )
+	ts_rtc = await rtc.read()
+	return retries, ts_rtc, round(ewma)
+
 async def sensor_poller( conf, mhz19, rtc,
 		readings, init_delay=0, abc_repeat=12*3593*1000, verbose=False ):
 	p_log = verbose and (lambda *a: print('[sensor]', *a))
 	read_delays = list(map(float, conf.sensor_read_delays.split()))
 	read_retry_delays = list(map(float, conf.sensor_read_retry_delays.split())) + [None]
+	ewma_read_delays = [0] + list(map(float, conf.sensor_ewma_read_delays.split()))
+	ewma_td_ms = round(1000 * sum(ewma_read_delays))
+	ewma_info = p_log and ( ( f'samples={len(ewma_read_delays)}' +
+		f' timespan={ewma_td_ms/1000:,.1f}s' ) if ewma_td_ms else 'single-read' )
+	mhz19_read = lambda: sensor_read( rtc, mhz19,
+		read_delays, read_retry_delays, conf.sensor_ewma_alpha, ewma_read_delays )
 
 	p_log and p_log('Init: configuration')
 	td_cycle = int(conf.sensor_interval * 1000)
@@ -287,17 +310,11 @@ async def sensor_poller( conf, mhz19, rtc,
 			# Arduino MH-Z19 code repeats this every 12h to "skip next ABC cycle"
 			# Not sure if it actually needs to be repeated, but why not
 			mhz19.set_abc(ts_abc_off); ts_abc = ts
-		p_log and p_log(f'datapoint read')
-		for n, td_retry in enumerate(read_retry_delays):
-			if ppm := await mhz19.read_ppm(read_delays):
-				ts_rtc = await rtc.read()
-				p_log and p_log(f'datapoint [retries={n}]: {ts_rtc} {ppm:,d}')
-				readings.put((ts_rtc, ppm + conf.sensor_ppm_offset))
-				break
-			if td_retry: await asyncio.sleep(td_retry)
-		else: raise RuntimeError(
-			f'CO2 sensor read failed after {len(read_retry_delays)} attempts' )
-		delay = max(0, td_cycle - time.ticks_diff(time.ticks_ms(), ts))
+		p_log and p_log(f'datapoint read [{ewma_info}]')
+		n, ts_rtc, ppm = await mhz19_read()
+		p_log and p_log(f'datapoint [retries={n}]: {ts_rtc} {ppm:,d}')
+		readings.put((ts_rtc, ppm + conf.sensor_ppm_offset))
+		delay = max(0, td_cycle - ewma_td_ms - time.ticks_diff(time.ticks_ms(), ts))
 		p_log and p_log(f'delay: {delay/1000:,.1f} ms')
 		await asyncio.sleep_ms(delay)
 
