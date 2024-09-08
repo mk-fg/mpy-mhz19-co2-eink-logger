@@ -336,56 +336,42 @@ class EPD_2in13_B_V4_Portrait:
 			while _p_busy.value(): await asyncio.sleep_ms(10)
 			await asyncio.sleep_ms(20)
 		def cmd(b, _p_dc=pins.dc, _p_cs=pins.cs):
-			_p_dc.value(0)
-			_p_cs.value(0)
-			self.spi.write(bytes([b]))
-			_p_cs.value(1)
+			_p_dc.value(0); _p_cs.value(0)
+			self.spi.write(bytes([b])); _p_cs.value(1)
 		def data(bs, _p_dc=pins.dc, _p_cs=pins.cs):
 			if isinstance(bs, int): bs = bytes([bs])
 			elif isinstance(bs, list): bs = bytes(b&0xff for b in bs)
-			_p_dc.value(1)
-			_p_cs.value(0)
-			self.spi.write(bs)
-			_p_cs.value(1)
+			_p_dc.value(1); _p_cs.value(0)
+			self.spi.write(bs); _p_cs.value(1)
 		self.wait_ready, self.cmd, self.data = wait_ready, cmd, data
 
 		p_log and p_log('Init: reset')
-		pins.reset.value(1)
-		time.sleep_ms(50)
-		pins.reset.value(0)
-		time.sleep_ms(2)
-		pins.reset.value(1)
-		time.sleep_ms(50)
+		pins.reset.value(1); await asyncio.sleep_ms(50)
+		pins.reset.value(0); await asyncio.sleep_ms(2)
+		pins.reset.value(1); await asyncio.sleep_ms(50)
 		await wait_ready()
 		cmd(0x12) # swreset
 		await wait_ready()
 
 		p_log and p_log('Init: configuration')
 		# Output control
-		cmd(0x01)
-		data(b'\xf9\0\0')
+		cmd(0x01); data(b'\xf9\0\0')
 		# Data entry mode
-		cmd(0x11)
-		data(0x03) # landscape mode uses 0x07
+		cmd(0x11); data(0x03) # landscape mode uses 0x07
 		# Window configuration
 		cmd(0x44) # set_ram_x_address_start_end_position
 		data([(x0 := 0)>>3, (x1 := self.w-1)>>3])
 		cmd(0x45) # set_ram_y_address_start_end_position
 		data([y0 := 0, y0>>8, y1 := self.h-1, y1>>8])
 		# Cusor position - not sure if x0/y0 are window or abs coordinates
-		cmd(0x4e) # set_ram_x_address_counter
-		data(x0 & 0xff)
-		cmd(0x4f) # set_ram_y_address_counter
-		data([y0, y0 >> 8])
+		cmd(0x4e); data(x0 & 0xff) # set_ram_x_address_counter
+		cmd(0x4f); data([y0, y0 >> 8]) # set_ram_y_address_counter
 		# BorderWaveform
-		cmd(0x3c)
-		data(0x05)
+		cmd(0x3c); data(0x05)
 		# Read built-in temperature sensor
-		cmd(0x18)
-		data(0x80)
+		cmd(0x18); data(0x80)
 		# Display update control
-		cmd(0x21)
-		data(b'\x80\x80')
+		cmd(0x21); data(b'\x80\x80')
 		await wait_ready()
 
 		p_log and p_log('Init: finished')
@@ -414,7 +400,7 @@ class EPD_2in13_B_V4_Portrait:
 		self.p_log and self.p_log('Sleep mode')
 		self.cmd(0x10)
 		self.data(0x01)
-		await time.sleep(2)
+		await asyncio.sleep(2)
 		self.p.reset.value(0)
 
 	def export_image_buffers(self, line_bytes=90):
