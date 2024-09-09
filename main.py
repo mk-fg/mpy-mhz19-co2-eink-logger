@@ -14,10 +14,9 @@ class CO2LogConf:
 	sensor_init_delay = 210.0
 	sensor_interval = 1021.0
 	sensor_detection_range = 2_000
-	sensor_self_calibration = False
+	sensor_self_calibration = True
 	sensor_ppm_offset = 0
-	sensor_ewma_alpha = 0.4
-	sensor_ewma_read_delays = ''
+	sensor_median_read_delays = ''
 	sensor_read_delays = '0.1 0.1 0.1 0.2 0.3 0.5 1.0'
 	sensor_read_retry_delays = '0.1 1 5 10 20 40 80 120 180'
 
@@ -37,6 +36,8 @@ class CO2LogConf:
 	screen_test_fill = False
 	screen_test_export = False
 	screen_timeout = 80.0
+
+	ppm_thresholds = {800:'  hi', 1200:'BAD', 1700:'WARN', 2200:'!!!!'}
 
 p_err = lambda *a: print('ERROR:', *a)
 err_fmt = lambda err: f'[{err.__class__.__name__}] {err}'
@@ -74,6 +75,14 @@ def conf_parse(conf_file):
 				elif isinstance(val_conf, (int, float)): val = type(val_conf)(val)
 				elif not isinstance(val_conf, str): raise ValueError(val_conf)
 				setattr(conf, key_conf, val)
+	if sec := conf_lines.get(sk := 'co2-ppm-thresholds'):
+		ppms = conf.ppm_thresholds = dict()
+		for key_raw, key, val in sec:
+			if not key.isdigit() or not val:
+				p_err(f'[conf.{sk}] Skipping non number=msg ppm threshold [ {key} = {val} ]')
+				continue
+			if val[0] in '\'"' and val[-1] == val[0]: val = val[1:-1]
+			ppms[int(key)] = val
 	return conf
 
 def conf_vals(conf, sec, keys, flat=False):
@@ -156,31 +165,30 @@ class MHZ19:
 		self.uart.write(bs)
 
 
-async def sensor_read(rtc, mhz19, read_delays, retry_delays, ewma_a, ewma_tds):
-	ewma, retries = None, 0
-	for td in ewma_tds:
+async def sensor_read(rtc, mhz19, read_delays, retry_delays, sample_tds):
+	retries, samples = 0, list()
+	for td in sample_tds:
 		if td: await asyncio.sleep(td)
 		for n, td_retry in enumerate(retry_delays):
 			if ppm := await mhz19.read_ppm(read_delays):
-				ewma = ppm if ewma is None else (ppm * ewma_a + (1-ewma_a)*ewma)
-				retries += n; break
+				samples.append(ppm); retries += n; break
 			if td_retry: await asyncio.sleep(td_retry)
 		else: raise RuntimeError(
 			f'CO2 sensor read failed after {len(retry_delays)} attempt(s)' )
-	ts_rtc = await rtc.read()
-	return retries, ts_rtc, round(ewma)
+	ts_rtc = await rtc.read(); samples.sort()
+	return retries, ts_rtc, samples[len(samples) // 2]
 
 async def sensor_poller( conf, mhz19, rtc,
 		readings, init_delay=0, abc_repeat=12*3593*1000, verbose=False ):
 	p_log = verbose and (lambda *a: print('[sensor]', *a))
 	read_delays = list(map(float, conf.sensor_read_delays.split()))
 	read_retry_delays = list(map(float, conf.sensor_read_retry_delays.split())) + [None]
-	ewma_read_delays = [0] + list(map(float, conf.sensor_ewma_read_delays.split()))
-	ewma_td_ms = round(1000 * sum(ewma_read_delays))
-	ewma_info = p_log and ( ( f'samples={len(ewma_read_delays)}' +
-		f' timespan={ewma_td_ms/1000:,.1f}s' ) if ewma_td_ms else 'single-read' )
-	mhz19_read = lambda: sensor_read( rtc, mhz19,
-		read_delays, read_retry_delays, conf.sensor_ewma_alpha, ewma_read_delays )
+	median_tds = [0] + list(map(float, conf.sensor_median_read_delays.split()))
+	median_td_ms = round(1000 * sum(median_tds))
+	median_info = p_log and ( ( f'samples={len(median_tds)}' +
+		f' timespan={median_td_ms/1000:,.1f}s' ) if median_td_ms else 'single-read' )
+	mhz19_read = lambda: sensor_read(
+		rtc, mhz19, read_delays, read_retry_delays, median_tds )
 
 	p_log and p_log('Init: configuration')
 	td_cycle = int(conf.sensor_interval * 1000)
@@ -201,11 +209,11 @@ async def sensor_poller( conf, mhz19, rtc,
 			# Arduino MH-Z19 code repeats this every 12h to "skip next ABC cycle"
 			# Not sure if it actually needs to be repeated, but why not
 			mhz19.set_abc(ts_abc_off); ts_abc = ts
-		p_log and p_log(f'datapoint read [{ewma_info}]')
+		p_log and p_log(f'datapoint read [{median_info}]')
 		n, ts_rtc, ppm = await mhz19_read()
 		p_log and p_log(f'datapoint [retries={n}]: ts={ts_rtc} ppm={ppm:,d}')
 		readings.put((ts_rtc, ppm + conf.sensor_ppm_offset))
-		delay = max(0, td_cycle - ewma_td_ms - time.ticks_diff(time.ticks_ms(), ts))
+		delay = max(0, td_cycle - median_td_ms - time.ticks_diff(time.ticks_ms(), ts))
 		p_log and p_log(f'delay: {delay/1000:,.1f} ms')
 		await asyncio.sleep_ms(delay)
 
@@ -348,32 +356,32 @@ def co2_log_fake_gen(ts_rtc=None, td=673):
 		ts_rtc -= td
 	return reversed(values)
 
-def co2_log_text(tt, co2):
+def co2_log_text(tt, ppm, ppm_msgs):
 	ts_rtc = f'{tt[3]:02d}:{tt[4]:02d}'
-	# XXX: configurable comments for levels
-	if co2 < 800: warn = ''
-	elif co2 < 1500: warn = ' hi'
-	elif co2 < 2500: warn = ' BAD'
-	elif co2 < 5000: warn = ' WARN'
-	else: warn = ' !!!!'
-	return f'{ts_rtc} {co2: >04d}{warn}'
+	for ppm_chk, msg in ppm_msgs:
+		if ppm >= ppm_chk: break
+	else: msg = ''
+	return f'{ts_rtc} {ppm: >04d} {msg}'
 
-async def co2_log_scroller(epd, readings, x0=1, y0=3, y_line=10, export=False):
+async def co2_log_scroller( epd, readings,
+		x0=1, y0=3, y_line=10, export=False, ppm_msgs=dict() ):
 	# x: 0 <x0> text <epd.w-1>
 	# y: 0 <y0> header hline <yh> lines[0] ... <yt> lines[lines_n-1] <epd.h-1>
-	# XXX: maybe put dotted vlines to separate times and warnings
-	buffs = epd.black, epd.red
+	buffs, ppm_msgs = (epd.black, epd.red), sorted(ppm_msgs.items(), reverse=True)
 	if not export: await epd.clear()
 	else:
 		for buff in buffs: buff.fill(1)
 	ys = y_line; yh = y0 + ys + 3
 	lines_n = (epd.h - yh) // ys; yt = yh + ys * (lines_n - 1)
-	lines, line_t = list(), cs.namedtuple('Line', 'red tt co2 text')
+	lines, line_t = list(), cs.namedtuple('Line', 'red tt ppm text')
+	for ysv in 5, 4, 3, 2, 0: # pick vline step that will work with scrolling
+		if not ysv or ys%ysv == 0: break
 	while True:
 		# Wait for new reading
-		ts_rtc, co2 = await readings.get()
+		ts_rtc, ppm = await readings.get()
 		tt, red = time.localtime(ts_rtc), bool(lines) and lines[-1].red
-		lines.append(line := line_t(not red, tt, co2, co2_log_text(tt, co2)))
+		lines.append(line := line_t( not red,
+			tt, ppm, co2_log_text(tt, ppm, ppm_msgs) ))
 		# Scroll lines up in both buffers, scrub top/bottom
 		if len(lines) > lines_n:
 			lines[:] = lines[1:]
@@ -386,6 +394,9 @@ async def co2_log_scroller(epd, readings, x0=1, y0=3, y_line=10, export=False):
 		buff = buffs[not lines[0].red]
 		buff.text(f'{yy%100:02d}-{mo:02d}-{dd:02d} CO2ppm', x0, y0, 0)
 		epd.black.hline(0, y0 + ys, epd.w, 0)
+		if ysv:
+			for y in range(y0 + ys + ysv//2, epd.h - y0 + 1, ysv):
+				epd.black.pixel(x0+8*10+4, y, 0)
 		# Add new line at the end
 		buffs[line.red].text(line.text, x0, yh + ys * (len(lines) - 1), 0)
 		# Display/dump buffers
@@ -418,8 +429,8 @@ async def main_co2log(conf):
 	if not (epd_export := conf.screen_test_export):
 		epd = await epd.hw_init( machine.SPI(conf.screen_spi),
 			**conf_vals(conf, 'screen_pin', 'dc cs reset busy') )
-	components.append(co2_log_scroller( epd, readings,
-		export=epd_export, **conf_vals(conf, 'screen', 'x0 y0 y_line') ))
+	components.append(co2_log_scroller( epd, readings, export=epd_export,
+		ppm_msgs=conf.ppm_thresholds, **conf_vals(conf, 'screen', 'x0 y0 y_line') ))
 
 	print('--- CO2Log start ---')
 	await asyncio.gather(*components)

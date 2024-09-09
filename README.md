@@ -1,8 +1,9 @@
 Micropython MH-Z19x CO2 EInk Logger
 ===================================
 
-Code for running an autonomous CO2 meter device, showing timestamped log
-of its measurements on a persistent EInk screen (or ePaper one actually).
+Code for running an autonomous CO2 (CO₂, [Carbon Dioxide]) meter device,
+showing timestamped log of its measurements on a persistent EInk screen
+(or ePaper one actually).
 
 Components involved:
 
@@ -20,6 +21,7 @@ stored anywhere else, so will be lost when it's cleared (e.g. on next use).
 Intended use is to plug or drop the thing with a powerbank in a place
 temporarily, to pick it up and check how CO2 levels vary there over time later.
 
+[Carbon Dioxide]: https://en.wikipedia.org/wiki/Carbon_dioxide
 [micropython firmware]: https://micropython.org/
 [Winsen MH-Z19E NDIR CO2 Sensor]:
   https://www.winsen-sensor.com/sensors/co2-sensor/mh-z19e.html
@@ -32,9 +34,18 @@ temporarily, to pick it up and check how CO2 levels vary there over time later.
 Table of Contents for this README:
 
 - [How to use](#hdr-how_to_use)
+- [Optional features](#hdr-optional_features)
+    - [Disabling sensor zero-point self-calibration]
+    - [Display average (median) of multiple sensor readings]
+    - [CO2 PPM threshold labels](#hdr-co2_ppm_threshold_labels)
 - [Helper scripts](#hdr-helper_scripts_and_debugging)
 - [Links](#hdr-links)
 - [TODO](#hdr-todo)
+
+[Disabling sensor zero-point self-calibration]:
+  #hdr-disabling_sensor_zero-point_self-calibration
+[Display average (median) of multiple sensor readings]:
+  #hdr-display_average_median_of_multiple_senso.f3Ri
 
 Repository URLs:
 
@@ -90,13 +101,62 @@ Running it should clear the screen on start, then wait for sensor `init-delay`
 (aka "preheat time", 3-4 minutes by default), then get and add every new sensor
 readings with configured `interval` value (15-20 min).
 
-Default configuration disables sensor self-calibration (also known as Automatic
-Baseline Correction mode), so make sure to either calibrate it manually using
-"HD" pin, or enable it using `self-calibration = yes` option, if measured space
-is expected to be ventilated daily.
+
+<a name=hdr-optional_features></a>
+## Optional features
+
+Some less obvious features are default-disabled in the configuration file, to
+keep default operation most straightforward, but can be useful, if you understand
+what these do.
+
+<a name=hdr-disabling_sensor_zero-point_self-calibration></a>
+### Disabling sensor zero-point self-calibration
+
+(also sometimes referred to as ABC - Automatic Baseline Correction mode)
+
+Default configuration keeps it enabled, as it might not be obvious/possible to
+do manually, but afaik it's better to do manually, unless sensor runs in a space
+that is expected to be well-ventilated at least once a day, which is where it
+sets its baseline from every 24 hours.
+
+Manual calibration is easy - set `self-calibration = no` in the config file,
+let sensor run for 20+ minutes in (fresh) outdoor air, then connect its HD pin
+to the ground for 7+ seconds.
+Next PPM readings should be 400 or so, indicating that it set its 400ppm level
+from that air. Datasheet recommends doing this at least every 6 months.
+
 See [Bible of MH-Z19x CO2 sensors] for a lot more details on all this.
 
 [Bible of MH-Z19x CO2 sensors]: https://emariete.com/en/sensor-co2-mh-z19b/
+
+<a name=hdr-display_average_median_of_multiple_senso.f3Ri></a>
+### Display average (median) of multiple sensor readings
+
+Config has default-empty `median-read-delays` option, which allows to do that.
+
+Presumably sensor itself tracks some kind of average, but I don't have good data
+on that, so if you want to have more reliable "not a fluke" reading, can take
+multiple samples within the interval and take the median one.
+
+["median" value] is the one you'd get in the middle of a sorted list of samples.\
+E.g. with `[654, 1210, 641, 657, 650]` list of readings, when sorted, it'd look
+like this - `[641, 650, 654, 657, 1210]`, and median value there is `654`,
+disregarding a likely-bogus `1210` sample in this instance.
+
+It is disabled by default, to present most intuitive single-sample value,
+without any extra processing like this.
+
+["median" value]: https://en.wikipedia.org/wiki/Median
+
+<a name=hdr-co2_ppm_threshold_labels></a>
+### CO2 PPM threshold labels
+
+`[co2-ppm-thresholds]` section allows to set different labels that are printed
+in rightmost column after CO₂ PPM concentration values, to visually highlight
+any issues with those, so that one can easily tell if these were ok/good/bad/etc
+at a glance.
+
+Defaults are listed in [config.example.ini] and at the top of [main.py] script.
 
 
 <a name=hdr-helper_scripts_and_debugging></a>
