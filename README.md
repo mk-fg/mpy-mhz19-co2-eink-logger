@@ -1,8 +1,8 @@
 Micropython MH-Z19x CO2 EInk Logger
 ===================================
 
-Code for running an autonomous CO2 (CO₂, [Carbon Dioxide]) meter device,
-showing timestamped log of its measurements on a persistent EInk screen
+Micropython script for running an autonomous CO2 (CO₂, [Carbon Dioxide]) meter
+device, printing timestamped log of its measurements on a persistent EInk screen
 (or ePaper one actually).
 
 Components involved:
@@ -38,6 +38,7 @@ Table of Contents for this README:
     - [Disabling sensor zero-point self-calibration]
     - [Display average (median) of multiple sensor readings]
     - [CO2 PPM threshold labels](#hdr-co2_ppm_threshold_labels)
+    - [Pre-byte-compile main script](#hdr-pre-byte-compile_main_script)
 - [Helper scripts](#hdr-helper_scripts_and_debugging)
 - [Links](#hdr-links)
 
@@ -126,6 +127,10 @@ from that air. Datasheet recommends doing this at least every 6 months.
 
 See [Bible of MH-Z19x CO2 sensors] for a lot more details on all this.
 
+Also, if sensor is off in outdoor air even after calibration, there is
+`ppm-offset` option to add/subtract a fixed value from it, though maybe
+it's better to replace it in that case - might be off in more than one way.
+
 [Bible of MH-Z19x CO2 sensors]: https://emariete.com/en/sensor-co2-mh-z19b/
 
 <a name=hdr-display_average_median_of_multiple_senso.f3Ri></a>
@@ -156,6 +161,18 @@ any issues with those, so that one can easily tell if these were ok/good/bad/etc
 at a glance.
 
 Defaults are listed in [config.example.ini] and at the top of [main.py] script.
+
+<a name=hdr-pre-byte-compile_main_script></a>
+### Pre-byte-compile main script
+
+Not that important here, will only make it startup some ms faster and use less
+memory, which it isn't really using much anyway.
+
+Follow [instructions from rp2040-sen5x-air-quality-webui-monitor project],
+just maybe use co2log.mpy instead of aqm.mpy filename for clarity.
+
+[instructions from rp2040-sen5x-air-quality-webui-monitor project]:
+  https://github.com/mk-fg/rp2040-sen5x-air-quality-webui-monitor#hdr-setup_to_auto-run_efficiently_as_.mpy_file
 
 
 <a name=hdr-helper_scripts_and_debugging></a>
@@ -225,7 +242,7 @@ adjustment has to be run every six months (or TZ offsets handling added to main.
   documentation on these devices, which datasheets lack.
 
 - [Waveshare ePaper Display "Precautions" section] - for recommendations on
-  minimum refresh interval, how long-term storage, etc - to avoid damaging it.
+  minimum refresh interval, long-term storage, etc - to avoid damaging it.
 
 - [ESPHome] - more comprehensive home automation system, which also supports
   this family of sensors (among many others) connected to microcontrollers,
