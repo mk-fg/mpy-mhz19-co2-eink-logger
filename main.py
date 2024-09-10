@@ -193,8 +193,8 @@ async def sensor_poller( conf, mhz19, rtc,
 	p_log and p_log('Init: configuration')
 	td_cycle = int(conf.sensor_interval * 1000)
 	await asyncio.sleep(0.2)
-	mhz19.set_abc(ts_abc_off := conf.sensor_self_calibration)
-	if not ts_abc_off: ts_abc = time.ticks_ms()
+	mhz19.set_abc(abc := conf.sensor_self_calibration)
+	if not abc: ts_abc_repeat = time.ticks_ms()
 	await asyncio.sleep(0.2)
 	mhz19.set_range(conf.sensor_detection_range)
 	if (delay := conf.sensor_init_delay - time.ticks_ms() / 1000) > 0:
@@ -205,10 +205,10 @@ async def sensor_poller( conf, mhz19, rtc,
 	p_log and p_log(f'Starting poller loop ({td_cycle/1000:,.1f}s interval)...')
 	while True:
 		ts = time.ticks_ms()
-		if not ts_abc_off and time.ticks_diff(ts, ts_abc) > abc_repeat:
+		if not abc and time.ticks_diff(ts, ts_abc_repeat) > abc_repeat:
 			# Arduino MH-Z19 code repeats this every 12h to "skip next ABC cycle"
 			# Not sure if it actually needs to be repeated, but why not
-			mhz19.set_abc(ts_abc_off); ts_abc = ts
+			mhz19.set_abc(abc); ts_abc_repeat = ts
 		p_log and p_log(f'datapoint read [{median_info}]')
 		n, ts_rtc, ppm = await mhz19_read()
 		p_log and p_log(f'datapoint [retries={n}]: ts={ts_rtc} ppm={ppm:,d}')
