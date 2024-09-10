@@ -183,13 +183,13 @@
 <polygon points="488 -102.25 488 -104.25 845 -104.25 845 -102.25"/>
 <text x="491.5" y="-86.95" font-family="DejaVu Sans" font-size="14">MCU:22:GP17-I2C0-SCL</text>
 <text x="662.38" y="-86.95" font-family="DejaVu Sans" font-size="14">3:BU    </text>
-<text x="741" y="-86.95" font-family="DejaVu Sans" font-size="14">RTC:3:I2C-SDA</text>
+<text x="742.5" y="-86.95" font-family="DejaVu Sans" font-size="14">RTC:3:I2C-SCL</text>
 <polygon points="488 -79.25 488 -81.25 845 -81.25 845 -79.25"/>
 <polygon points="488 -77.25 488 -79.25 845 -79.25 845 -77.25" fill="#06f"/>
 <polygon points="488 -75.25 488 -77.25 845 -77.25 845 -75.25"/>
 <text x="490" y="-59.95" font-family="DejaVu Sans" font-size="14">MCU:21:GP16-I2C0-SDA</text>
 <text x="662" y="-59.95" font-family="DejaVu Sans" font-size="14">4:GN    </text>
-<text x="742.5" y="-59.95" font-family="DejaVu Sans" font-size="14">RTC:4:I2C-SCL</text>
+<text x="741" y="-59.95" font-family="DejaVu Sans" font-size="14">RTC:4:I2C-SDA</text>
 <polygon points="488 -52.25 488 -54.25 845 -54.25 845 -52.25"/>
 <polygon points="488 -50.25 488 -52.25 845 -52.25 845 -50.25" fill="#0f0"/>
 <polygon points="488 -48.25 488 -50.25 845 -50.25 845 -48.25"/>
@@ -202,12 +202,12 @@
 <path d="m312.5-103c77.58 0 96.97-0.25 174.5-0.25" stroke="#000"/>
 <path d="m312.5-105c77.56 0 96.94-0.25 174.5-0.25" stroke="#000"/>
 <path d="m312.5-107c77.53 0 96.92-0.25 174.5-0.25" stroke="#000"/>
-<path d="m312.5-53c77.19-0.04 96.55 3.71 174.5 3.75" stroke="#000"/>
-<path d="m312.5-55c77.57 0 96.93 3.75 174.5 3.75" stroke="#0f0"/>
-<path d="m312.5-57c77.95 0.04 97.31 3.79 174.5 3.75" stroke="#000"/>
 <path d="m312.5-78c77.38-0.01 96.76 1.74 174.5 1.75" stroke="#000"/>
 <path d="m312.5-80c77.56 0 96.94 1.75 174.5 1.75" stroke="#06f"/>
 <path d="m312.5-82c77.74 0.01 97.12 1.76 174.5 1.75" stroke="#000"/>
+<path d="m312.5-53c77.19-0.04 96.55 3.71 174.5 3.75" stroke="#000"/>
+<path d="m312.5-55c77.57 0 96.93 3.75 174.5 3.75" stroke="#0f0"/>
+<path d="m312.5-57c77.95 0.04 97.31 3.79 174.5 3.75" stroke="#000"/>
 </g>
 <g class="node">
 <polygon points="1128 -585.25 1020.5 -585.25 1020.5 -409.75 1128 -409.75" fill="#b5e9ff" stroke="#000"/>
@@ -255,11 +255,11 @@
 <polygon points="1020.5 -67.25 1020.5 -92.25 1050.2 -92.25 1050.2 -67.25" fill="none" stroke="#000"/>
 <text x="1030.88" y="-74.95" font-family="DejaVu Sans" font-size="14">3</text>
 <polygon points="1050.2 -67.25 1050.2 -92.25 1128 -92.25 1128 -67.25" fill="none" stroke="#000"/>
-<text x="1060.25" y="-74.95" font-family="DejaVu Sans" font-size="14">I2C-SDA</text>
+<text x="1061.75" y="-74.95" font-family="DejaVu Sans" font-size="14">I2C-SCL</text>
 <polygon points="1020.5 -42.25 1020.5 -67.25 1050.2 -67.25 1050.2 -42.25" fill="none" stroke="#000"/>
 <text x="1030.88" y="-49.95" font-family="DejaVu Sans" font-size="14">4</text>
 <polygon points="1050.2 -42.25 1050.2 -67.25 1128 -67.25 1128 -42.25" fill="none" stroke="#000"/>
-<text x="1061.75" y="-49.95" font-family="DejaVu Sans" font-size="14">I2C-SCL</text>
+<text x="1060.25" y="-49.95" font-family="DejaVu Sans" font-size="14">I2C-SDA</text>
 </g>
 <g class="edge" fill="none" stroke-width="2">
 <path d="m876.5-524.25c63.54-0.06 79.49 3.94 144 4" stroke="#000"/>
@@ -283,12 +283,12 @@
 <path d="m846-103.25c77.5 0 96.89 0.5 174.5 0.5" stroke="#000"/>
 <path d="m846-105.25c77.56 0 96.94 0.5 174.5 0.5" stroke="#000"/>
 <path d="m846-107.25c77.61 0 97 0.5 174.5 0.5" stroke="#000"/>
-<path d="m846-49.25c77.93-0.03 97.28-3.53 174.5-3.5" stroke="#000"/>
-<path d="m846-51.25c77.57 0 96.93-3.5 174.5-3.5" stroke="#0f0"/>
-<path d="m846-53.25c77.22 0.03 96.57-3.47 174.5-3.5" stroke="#000"/>
 <path d="m846-76.25c77.71-0.01 97.1-1.51 174.5-1.5" stroke="#000"/>
 <path d="m846-78.25c77.56 0 96.94-1.5 174.5-1.5" stroke="#06f"/>
 <path d="m846-80.25c77.4 0.01 96.79-1.49 174.5-1.5" stroke="#000"/>
+<path d="m846-49.25c77.93-0.03 97.28-3.53 174.5-3.5" stroke="#000"/>
+<path d="m846-51.25c77.57 0 96.93-3.5 174.5-3.5" stroke="#0f0"/>
+<path d="m846-53.25c77.22 0.03 96.57-3.47 174.5-3.5" stroke="#000"/>
 </g>
 </g>
 </svg>

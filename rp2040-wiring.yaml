@@ -28,7 +28,7 @@ connectors:
 
   RTC:
     type: DS3231
-    pinlabels: [5V, GND, I2C-SDA, I2C-SCL]
+    pinlabels: [5V, GND, I2C-SCL, I2C-SDA]
 
   CO2-Sensor:
     type: MH-Z19
@@ -67,8 +67,8 @@ connections:
     - CO2-Sensor: [HD]
 
   -
-    - MCU: [VSYS, GND_3, GP16-I2C0-SDA, GP17-I2C0-SCL]
-    - rtc wires: [1, 2, 4, 3]
+    - MCU: [VSYS, GND_3, GP17-I2C0-SCL, GP16-I2C0-SDA]
+    - rtc wires: [1-4]
     - RTC: [5V, GND, I2C-SCL, I2C-SDA]
 
 ###
