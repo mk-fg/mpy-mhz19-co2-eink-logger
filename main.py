@@ -234,7 +234,7 @@ class EPD_2in13_B_V4_Portrait:
 	def __init__(self, w=122, h=250, timeout=120, verbose=False):
 		self.p_log = verbose and (lambda *a: print('[epd]', *a))
 		self.h, self.w, self.active, self.timeout = h, math.ceil(w/8)*8, None, timeout
-		for c in 'black', 'red':
+		for c in 'black', 'red': # can also be implemented as one GS2_HMSB buffer
 			setattr(self, f'{c}_buff', buff := bytearray(math.ceil(self.w * self.h / 8)))
 			setattr(self, c, framebuf.FrameBuffer(buff, self.w, self.h, framebuf.MONO_HLSB))
 
@@ -405,44 +405,60 @@ async def co2_log_scroller( epd, readings,
 		else: epd.export_image_buffers()
 
 
-async def main_co2log(conf):
-	components = list()
-	mhz19 = rtc = epd = None
+async def main_err_print(epd, fail, x0=0, y0=1, ys=8, export=False):
+	# Traceback is compressed into one long line with alternating colors
+	# Standard "File <name>, line <n>, in" traceback-lines are shortened
+	# If it's still too long, only tail end is printed
+	cw, ch = (epd.w - 2*x0) // 8, (epd.h - 2*y0) // ys
+	hdr = '~ FATAL ERROR ~'[:cw]
+	if (n := cw - len(hdr) - 1) > 0: hdr += ' '*n
+	lines = [hdr]
+	lines.extend( re.sub(r'File "([^"]+)", line (\d+), in ', r'\1:\2: ', s) for s in
+		(re.sub(r'\s+', ' ', s.strip()) for s in re.sub('\n+', '\n', fail).splitlines()) )
+	for bn, buff in enumerate([epd.red, epd.black]):
+		buff.fill(1); fail = list()
+		for ln, line in enumerate(lines):
+			if ln & 1 == bn: line = ' '*len(line)
+			fail.append(line)
+		fail = ' '.join(fail)
+		fail = list(fail[n:n+cw] for n in range(0, len(fail), cw))[-ch:]
+		for line, y in zip(fail, range(y0, epd.h, ys)): buff.text(line, x0, y, 0)
+	if not export: await epd.display()
+	else: epd.export_image_buffers()
 
-	readings = ReadingsQueue()
+def main_co2log(conf, epd, rtc): # split to gc its context on error
+	mhz19, components, readings = None, list(), ReadingsQueue()
 	if conf.sensor_enabled:
 		uart_id, rx, tx = conf_vals(conf, 'sensor', 'uart pin_rx pin_tx', flat=True)
 		mhz19 = MHZ19(machine.UART(
 			uart_id, rx=machine.Pin(rx), tx=machine.Pin(tx),
 			baudrate=9600, bits=8, stop=1, parity=None ))
-		i2c_id, sda, scl = conf_vals(conf, 'rtc', 'i2c pin_sda pin_scl', flat=True)
-		rtc = RTC_DS3231(machine.I2C(i2c_id, sda=machine.Pin(sda), scl=machine.Pin(scl)))
 		components.append(sensor_poller(
 			conf, mhz19, rtc, readings, verbose=conf.sensor_verbose ))
 	if conf.screen_test_fill:
 		ts_rtc = rtc and await rtc.read()
 		co2_gen = co2_log_fake_gen(ts_rtc=ts_rtc, td=conf.sensor_interval)
 		for ts_rtc, ppm in co2_gen: readings.put((ts_rtc, ppm))
+	components.append(co2_log_scroller(
+		epd, readings, export=conf.screen_test_export,
+		ppm_msgs=conf.ppm_thresholds, **conf_vals(conf, 'screen', 'x0 y0 y_line') ))
+	print('--- CO2Log start ---')
+	try: return await asyncio.gather(*components)
+	finally: print('--- CO2Log stop ---')
 
+async def main():
+	print('--- CO2Log init ---')
+	conf = conf_parse('config.ini')
+	i2c, sda, scl = conf_vals(conf, 'rtc', 'i2c pin_sda pin_scl', flat=True)
+	rtc = RTC_DS3231(machine.I2C(i2c, sda=machine.Pin(sda), scl=machine.Pin(scl)))
 	epd = EPD_2in13_B_V4_Portrait(
 		timeout=conf.screen_timeout, verbose=conf.screen_verbose )
 	if not (epd_export := conf.screen_test_export):
 		epd = await epd.hw_init( machine.SPI(conf.screen_spi),
 			**conf_vals(conf, 'screen_pin', 'dc cs reset busy') )
-	components.append(co2_log_scroller( epd, readings, export=epd_export,
-		ppm_msgs=conf.ppm_thresholds, **conf_vals(conf, 'screen', 'x0 y0 y_line') ))
 
-	print('--- CO2Log start ---')
-	await asyncio.gather(*components)
-	print('--- CO2Log stop ---')
-
-async def main():
-	print('--- CO2Log init ---')
-	conf, fail = conf_parse('config.ini'), None
-	try: return await main_co2log(conf)
+	try: return await main_co2log(conf, epd, rtc)
 	except Exception as err: fail = err
-	fail_ts = time.ticks_ms()
-
 	gc.collect() # in case it was a mem shortage
 	gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
@@ -450,10 +466,15 @@ async def main():
 	p_err('One of the main components failed, traceback follows...')
 	sys.print_exception(fail)
 
-	err = io.BytesIO()
+	err = io.StringIO()
 	sys.print_exception(fail, err)
 	err, fail = None, err.getvalue()
-	# XXX: format error for display here, if it's working
+	if rtc:
+		try:
+			yy, mo, dd, hh, mm = time.localtime(await rtc.read())[:5]
+			fail += f'\n[at {yy%100:02d}-{mo:02d}-{dd:02d} {hh:02d}:{mm:02d}]'
+		except: pass
+	await main_err_print(epd, fail, export=epd_export)
 
 def run(): asyncio.run(main())
 if __name__ == '__main__': run()

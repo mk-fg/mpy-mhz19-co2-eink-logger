@@ -40,7 +40,6 @@ Table of Contents for this README:
     - [CO2 PPM threshold labels](#hdr-co2_ppm_threshold_labels)
 - [Helper scripts](#hdr-helper_scripts_and_debugging)
 - [Links](#hdr-links)
-- [TODO](#hdr-todo)
 
 [Disabling sensor zero-point self-calibration]:
   #hdr-disabling_sensor_zero-point_self-calibration
@@ -136,7 +135,7 @@ Config has default-empty `median-read-delays` option, which allows to do that.
 
 Presumably sensor itself tracks some kind of average, but I don't have good data
 on that, so if you want to have more reliable "not a fluke" reading, can take
-multiple samples within the interval and take the median one.
+multiple samples within an interval and take the median one.
 
 ["median" value] is the one you'd get in the middle of a sorted list of samples.\
 E.g. with `[654, 1210, 641, 657, 650]` list of readings, when sorted, it'd look
@@ -242,11 +241,3 @@ adjustment has to be run every six months (or TZ offsets handling added to main.
 [ESPHome]: https://esphome.io/components/sensor/mhz19.html
 [rp2040-sen5x-air-quality-webui-monitor]:
   https://github.com/mk-fg/rp2040-sen5x-air-quality-webui-monitor
-
-
-<a name=hdr-todo></a>
-## TODO
-
-- Finish leftover XXX not-implemented things in the code.
-
-- Add on-screen error output, if there are any.
