@@ -37,7 +37,7 @@ class CO2LogConf:
 	screen_test_export = False
 	screen_timeout = 80.0
 
-	ppm_thresholds = {800:'  hi', 1200:'BAD', 1700:'WARN', 2200:'!!!!'}
+	ppm_thresholds = {930:'  hi', 1400:'BAD', 1800:'WARN', 2400:'!!!!'}
 
 p_err = lambda *a: print('ERROR:', *a)
 err_fmt = lambda err: f'[{err.__class__.__name__}] {err}'
