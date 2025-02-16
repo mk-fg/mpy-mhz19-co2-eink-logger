@@ -1,3 +1,5 @@
+# -*- mode: python -*-
+
 import machine, time, framebuf, gc, math, re, collections as cs
 
 try: import uasyncio as asyncio
